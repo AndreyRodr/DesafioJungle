@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
+import { ArrowLeft, ShoppingCart, Minus, Plus } from 'lucide-react'
+import { isAxiosError } from 'axios'
+import { useNft } from '../hooks/useNft'
+import { FavoriteButton } from '@/features/favorites/components/FavoriteButton'
 import { ArrowLeft, Heart, ShoppingCart, Minus, Plus } from 'lucide-react'
 import { isAxiosError } from 'axios'
 import { useNft } from '../hooks/useNft'
@@ -81,6 +85,7 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
             <button type="button" disabled={max === 0 || add.isPending} onClick={() => void handleAdd(false)} className="flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[#d38d50] px-4 text-sm font-bold text-[#d38d50] hover:bg-[#352216] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"><ShoppingCart size={18} /> Adicionar ao carrinho</button>
             <button type="button" disabled={max === 0 || add.isPending} onClick={() => void handleAdd(true)} className="min-h-12 rounded-lg bg-[#d38d50] px-4 text-sm font-bold text-[#160e0b] hover:bg-[#efad70] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50">{add.isPending ? 'Adicionando…' : 'Comprar agora'}</button>
           </div>
+          <div className="mt-5 flex items-center gap-3 text-sm text-[#b99872]"><FavoriteButton nftId={nft.id} /> Adicionar aos favoritos</div>
           <button type="button" disabled title="Disponível após implementar login" className="mt-5 inline-flex items-center gap-2 text-xs text-[#b99872] disabled:opacity-70"><Heart size={17} /> Favoritos disponíveis após login</button>
         </div>
       </div>
