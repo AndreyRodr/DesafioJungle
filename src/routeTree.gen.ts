@@ -121,6 +121,10 @@ export interface FileRouteTypes {
     | '/register'
     | '/wallets'
     | '/nft/$nftId'
+  fullPaths: '/' | '/cart' | '/nft/$nftId'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/cart' | '/nft/$nftId'
+  id: '__root__' | '/' | '/cart' | '/nft/$nftId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {

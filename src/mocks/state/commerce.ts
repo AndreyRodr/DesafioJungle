@@ -24,6 +24,13 @@ export class MockBusinessError extends Error {
   constructor(message: string, status: number) { super(message); this.status = status }
 }
 
+
+  constructor(message: string, status: number) { 
+    super(message)
+    this.status = status
+  }
+} 
+
 function getNft(id: string): NFT | undefined {
   return nftFixtures.find((nft) => nft.id === id)
 }
@@ -55,6 +62,10 @@ function safeRead(scope = 'guest'): StoredCart {
   const fallback: StoredCart = { items: [], coupon: null }
   try {
     const raw = localStorage.getItem(cartKey(scope))
+function safeRead(): StoredCart {
+  const fallback: StoredCart = { items: [], coupon: null }
+  try {
+    const raw = localStorage.getItem(GUEST_CART_STORAGE_KEY)
     if (!raw) return fallback
     const parsed: unknown = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null || !('items' in parsed) || !Array.isArray(parsed.items)) return fallback
@@ -70,6 +81,8 @@ function safeRead(scope = 'guest'): StoredCart {
 
 function save(store: StoredCart, scope = 'guest'): void {
   try { localStorage.setItem(cartKey(scope), JSON.stringify(store)) }
+function save(store: StoredCart): void {
+  try { localStorage.setItem(GUEST_CART_STORAGE_KEY, JSON.stringify(store)) }
   catch { throw new MockBusinessError('Armazenamento indisponível. Tente liberar espaço e novamente.', 503) }
 }
 
@@ -98,12 +111,16 @@ function hydrate(store: StoredCart): CartResponse {
 export function readCart(scope = 'guest'): CartResponse { return hydrate(safeRead(scope)) }
 
 export function addLine(nftId: string, editionId: string, quantity: number, scope = 'guest'): CartResponse {
+export function readCart(): CartResponse { return hydrate(safeRead()) }
+
+export function addLine(nftId: string, editionId: string, quantity: number): CartResponse {
   const detail = getNftDetail(nftId)
   if (!detail) throw new MockBusinessError('NFT não encontrado', 404)
   const edition = detail.editions.find((option) => option.id === editionId)
   if (!edition) throw new MockBusinessError('Edição indisponível', 404)
   if (!Number.isSafeInteger(quantity) || quantity <= 0) throw new MockBusinessError('Quantidade inválida', 400)
   const store = safeRead(scope)
+  const store = safeRead()
   const existing = store.items.find((item) => item.nftId === nftId && item.editionId === editionId)
   if ((existing?.quantity ?? 0) + quantity > edition.available) throw new MockBusinessError('Estoque insuficiente para essa edição', 409)
   if (existing) existing.quantity += quantity
@@ -115,6 +132,13 @@ export function addLine(nftId: string, editionId: string, quantity: number, scop
 export function updateLine(key: string, quantity: number, scope = 'guest'): CartResponse {
   if (!Number.isSafeInteger(quantity) || quantity < 1) throw new MockBusinessError('Quantidade inválida', 400)
   const store = safeRead(scope)
+  save(store)
+  return hydrate(store)
+}
+
+export function updateLine(key: string, quantity: number): CartResponse {
+  if (!Number.isSafeInteger(quantity) || quantity < 1) throw new MockBusinessError('Quantidade inválida', 400)
+  const store = safeRead()
   const line = store.items.find((item) => `${item.nftId}__${item.editionId}` === key)
   if (!line) throw new MockBusinessError('Item não encontrado', 404)
   const nft = getNftDetail(line.nftId)
@@ -152,6 +176,37 @@ export function clearCoupon(scope = 'guest'): CartResponse {
 
 export function quoteCart(scope = 'guest'): CartQuote {
   const cart = readCart(scope)
+  save(store)
+  return hydrate(store)
+}
+
+export function deleteLine(key: string): CartResponse {
+  const store = safeRead()
+  if (!store.items.some((item) => `${item.nftId}__${item.editionId}` === key)) throw new MockBusinessError('Item não encontrado', 404)
+  store.items = store.items.filter((item) => `${item.nftId}__${item.editionId}` !== key)
+  save(store)
+  return hydrate(store)
+}
+
+export function setCoupon(code: string): CartResponse {
+  const normalized = code.trim().toUpperCase()
+  if (normalized === 'EXPIRED10') throw new MockBusinessError('Cupom expirado', 422)
+  if (normalized !== 'KURIO10') throw new MockBusinessError('Cupom inválido', 422)
+  const store = safeRead()
+  store.coupon = normalized
+  save(store)
+  return hydrate(store)
+}
+
+export function clearCoupon(): CartResponse {
+  const store = safeRead()
+  store.coupon = null
+  save(store)
+  return hydrate(store)
+}
+
+export function quoteCart(): CartQuote {
+  const cart = readCart()
   const subtotalWei = cart.items.reduce((sum, item) => sum + multiplyEth(item.unitPriceEth, item.quantity), 0n)
   const discountWei = cart.coupon === 'KURIO10' ? subtotalWei / 10n : 0n
   // Taxas apenas demonstrativas, cobradas por rede presente no carrinho.
