@@ -1,16 +1,10 @@
-
 import { useQuery } from '@tanstack/react-query'
 import { getNfts } from '../api/getNfts'
-import type { CatalogTab } from '../types/nft'
-import type { NFTCategory } from '../constants/categories'
+import type { CatalogFilters } from '../types/nft'
 
-export function useNFTs(
-  tab: CatalogTab,
-  category?: NFTCategory,
-  q?: string,
-) {
+export function useNFTs(filters: CatalogFilters) {
   return useQuery({
-    queryKey: ['nfts', { tab, category, q }],
-    queryFn: ({ signal }) => getNfts(tab, category, q, signal),
+    queryKey: ['nfts', filters],
+    queryFn: ({ signal }) => getNfts(filters, signal),
   })
 }
