@@ -72,7 +72,7 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
             {Array.from({ length: 4 }, (_,i) => <button type="button" key={i} aria-label={`Ver imagem ${i+1}`} aria-pressed={imageIndex === i} onClick={() => setImageIndex(i)} className={`overflow-hidden rounded-lg border-2 focus-visible:outline-2 focus-visible:outline-[#d38d50] ${imageIndex === i ? 'border-[#d38d50]' : 'border-transparent'}`}><img src={images[i % images.length]} alt="" className="aspect-square w-full object-cover" style={{objectPosition: i===1 ? '45% center' : i===2 ? '55% center' : 'center'}}/></button>)}
           </div>
           <div className="relative overflow-hidden rounded-2xl bg-transparent p-0 lg:rounded-lg lg:bg-[#291b15] lg:p-3">
-            <img src={images[imageIndex % images.length]} alt={`Arte digital ${nft.name}`} className="aspect-square w-full rounded-xl object-cover" fetchPriority="high"/>
+            <img src={images[imageIndex % images.length]} alt={`Arte digital ${nft.name}`} loading="eager" decoding="async" className="aspect-square w-full rounded-xl object-cover" fetchPriority="high"/>
             <button type="button" aria-label="Ampliar imagem" onClick={() => setZoom(true)} className="absolute right-5 top-5 hidden h-9 w-9 items-center justify-center rounded-full bg-[#251711]/80 text-[#f4ede5] lg:flex"><Search size={19}/></button>
           </div>
         </div>

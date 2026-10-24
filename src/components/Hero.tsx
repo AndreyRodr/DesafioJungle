@@ -129,6 +129,7 @@ export function Hero() {
           <img
             src={nft2}
             alt="Sage Nomad, NFT de um macaco com moletom roxo"
+            loading="lazy"
             decoding="async"
             className="
               absolute -bottom-3 -left-5

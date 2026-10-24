@@ -68,7 +68,7 @@ export function HomePage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6">
-                      {data?.items.map((nft) => <NFTCard key={nft.id} nft={nft} />)}
+                      {data?.items.map((nft, index) => <NFTCard key={nft.id} nft={nft} priority={index === 0} />)}
                     </div>
                   )}
                   {data && <CatalogPagination page={data.page} totalPages={data.totalPages} />}
