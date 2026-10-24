@@ -1,13 +1,10 @@
 import { test, expect } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/')
-  await page.evaluate(() => {
-    localStorage.clear()
-    sessionStorage.clear()
-  })
-  await page.reload()
-  await page.goto('/login')
+  // Playwright opens an isolated browser context for each test.
+  // A redundant reload before /login can cancel the next navigation (ERR_ABORTED).
+  await page.goto('/login', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByLabel('E-mail')).toBeVisible()
   await page.getByLabel('E-mail').fill('collector@kurio.test')
   await page.getByLabel('Senha').fill('Kurio@123')
   await page.getByRole('button', { name: /^entrar$/i }).click()
