@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { pageShellClass } from '@/components/layout/pageShell'
 import { Link } from '@tanstack/react-router'
 import { isAxiosError } from 'axios'
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
@@ -101,7 +102,7 @@ function Summary() {
 export function CartPage() {
   const { data, isPending, isError, refetch } = useCart()
   return (
-    <main className="mx-auto max-w-7xl px-5 pb-32 pt-8 text-[#f4ede5] lg:px-8 lg:pb-16">
+    <main className={`${pageShellClass} pb-32 pt-8 text-[#f4ede5] lg:pb-16`}>
       <Link to="/" className="mb-7 inline-flex items-center gap-2 font-mono text-sm text-[#d38d50]"><ArrowLeft size={18}/> Continuar explorando</Link>
       <h1 className="mb-7 font-mono text-3xl font-bold lg:sr-only">Carrinho de NFTs</h1>
       {isPending ? <div role="status" className="nft-shimmer h-48 rounded-2xl"><span className="sr-only">Carregando carrinho</span></div> : isError ? <div role="alert" className="rounded-xl bg-[#251711] p-6">Não foi possível carregar o carrinho. <button type="button" onClick={() => void refetch()} className="text-[#d38d50] underline">Tentar novamente</button></div> : !data?.items.length ? <div className="rounded-2xl border border-[#503328] bg-[#251711] p-10 text-center font-mono"><ShoppingBag size={44} className="mx-auto text-[#d38d50]"/><p className="mt-5">Seu carrinho está vazio.</p><Link to="/" className="mt-5 inline-block rounded-lg bg-[#d38d50] px-5 py-3 font-bold text-[#160e0b]">Explorar NFTs</Link></div> : <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_360px]">

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { pageShellClass } from '@/components/layout/pageShell'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { listWallets, saveWallet } from '@/features/auth/api/auth'
 import { useAuth } from '@/features/auth/hooks/useAuth'
@@ -35,7 +36,7 @@ function WalletForm({ slot, current }: { slot: 'primary' | 'secondary'; current?
 export function WalletsPage() {
   const { user } = useAuth()
   const { data, isPending, isError, refetch } = useQuery({ queryKey: ['wallets', user?.id], queryFn: listWallets, enabled: Boolean(user) })
-  return <div className="mx-auto max-w-7xl px-5 pb-32 pt-8 font-mono text-[#f4ede5] lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8 lg:px-8 lg:pb-16">
+  return <div className={`${pageShellClass} pb-32 pt-8 font-mono text-[#f4ede5] lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8 lg:pb-16`}>
     <ProfileSidebar active="wallets" />
     <main className="min-w-0">
     <h1 className="mt-5 text-3xl font-bold">Minhas carteiras</h1>

@@ -13,4 +13,9 @@ export interface NFTDetail extends NFT {
   gallery: string[]
   editions: NFTEdition[]
   version: number
+  collection: string
+  tokenId: string
+  attributes: string[]
+  rating?: number
+  reviewCount?: number
 }

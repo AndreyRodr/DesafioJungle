@@ -45,3 +45,120 @@ test('catalog has nine items per page and right-aligned numbered navigation', as
   await expect(cards).toHaveCount(5)
   await expect(pagination.getByRole('link', { name: 'Próxima página' })).toHaveCount(0)
 })
+
+test('NFT detail keeps edition, quantity and cart interactions on desktop and mobile', async ({ page }) => {
+  await page.goto('/nft/emerald-ape-042')
+  await expect(page.getByRole('heading', { name: 'Emerald Ape #042' })).toBeVisible()
+  await expect(page.getByText('Coleção: Kurio Apes').first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Aumentar quantidade' })).toBeVisible()
+  await page.getByRole('button', { name: 'Aumentar quantidade' }).click()
+  await expect(page.getByRole('spinbutton', { name: 'Quantidade' })).toHaveValue('2')
+  await page.getByRole('button', { name: 'Diminuir quantidade' }).click()
+  await expect(page.getByRole('spinbutton', { name: 'Quantidade' })).toHaveValue('1')
+  await expect(page.getByRole('button', { name: 'Comprar agora' })).toBeVisible()
+  if (page.viewportSize()?.width && page.viewportSize()!.width >= 1024) {
+    await expect(page.getByRole('heading', { name: 'Mais desta coleção' })).toBeVisible()
+    await page.getByRole('button', { name: 'Ver imagem 2' }).click()
+    await expect(page.getByRole('button', { name: 'Ver imagem 2' })).toHaveAttribute('aria-pressed', 'true')
+  }
+})
+
+test('desktop Home and Mercado use the same 1280px content alignment', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), 'Shared desktop shell is measured only at desktop viewport')
+  await page.goto('/')
+  const homeMain = await page.locator('main').first().boundingBox()
+  const homeHeader = await page.locator('header > div').first().boundingBox()
+  expect(homeMain).not.toBeNull()
+  expect(homeHeader).not.toBeNull()
+  expect(Math.abs(homeMain!.x - homeHeader!.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(homeMain!.width - homeHeader!.width)).toBeLessThanOrEqual(1)
+
+  await page.goto('/nft/emerald-ape-042')
+  const marketMain = await page.locator('main').first().boundingBox()
+  const marketHeader = await page.locator('header > div').first().boundingBox()
+  expect(marketMain).not.toBeNull()
+  expect(marketHeader).not.toBeNull()
+  expect(Math.abs(marketMain!.x - homeMain!.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(marketMain!.width - homeMain!.width)).toBeLessThanOrEqual(1)
+  expect(Math.abs(marketMain!.x - marketHeader!.x)).toBeLessThanOrEqual(1)
+})
+
+test('desktop header logo, Entrar and content have the exact same x coordinates across routes', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), 'Desktop geometry only')
+
+  async function geometry() {
+    const header = page.locator('header > div').first()
+    const main = page.locator('main').first()
+    const logo = page.getByRole('banner').getByRole('link', { name: 'KURIO', exact: true })
+    const login = page.getByRole('banner').getByRole('link', { name: 'Entrar', exact: true })
+
+    // Navigating to the route is not sufficient: React only renders after MSW starts.
+    await expect(header).toBeVisible()
+    await expect(main).toBeVisible()
+    await expect(logo).toBeVisible()
+    await expect(login).toBeVisible()
+
+    const [h, m, l, b, maxWidth, viewportWidth] = await Promise.all([
+      header.boundingBox(),
+      main.boundingBox(),
+      logo.boundingBox(),
+      login.boundingBox(),
+      header.evaluate(element => getComputedStyle(element).maxWidth),
+      page.evaluate(() => window.innerWidth),
+    ])
+    expect(h).not.toBeNull()
+    expect(m).not.toBeNull()
+    expect(l).not.toBeNull()
+    expect(b).not.toBeNull()
+    return {
+      headerLeft: h!.x,
+      headerRight: h!.x + h!.width,
+      mainLeft: m!.x,
+      mainRight: m!.x + m!.width,
+      logoLeft: l!.x,
+      loginRight: b!.x + b!.width,
+      maxWidth,
+      viewportWidth,
+    }
+  }
+
+  await page.goto('/')
+  const home = await geometry()
+  await page.goto('/nft/emerald-ape-042')
+  const market = await geometry()
+
+  for (const key of ['headerLeft', 'headerRight', 'mainLeft', 'mainRight', 'logoLeft', 'loginRight'] as const) {
+    expect(Math.abs(home[key] - market[key]), key).toBeLessThanOrEqual(1)
+  }
+  expect(home.maxWidth).toBe('1280px')
+  expect(market.maxWidth).toBe('1280px')
+  expect(home.viewportWidth).toBe(market.viewportWidth)
+})
+
+test('mobile NFT purchase toolbar stays fixed and gallery header has brown background', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes('mobile'), 'Mobile-only layout')
+  await page.goto('/nft/emerald-ape-042')
+  const toolbar = page.getByRole('complementary', { name: 'Barra de compra do NFT' })
+  await expect(toolbar).toBeVisible()
+  await expect(toolbar.getByRole('button', { name: 'Comprar agora' })).toBeVisible()
+  await expect(toolbar.getByRole('button', { name: 'Adicionar ao carrinho' })).toBeVisible()
+  await expect(toolbar.getByRole('spinbutton', { name: 'Quantidade' })).toBeVisible()
+
+  const before = await toolbar.evaluate(element => ({
+    position: getComputedStyle(element).position,
+    bottomGap: Math.abs(window.innerHeight - element.getBoundingClientRect().bottom),
+  }))
+  expect(before.position).toBe('fixed')
+  expect(before.bottomGap).toBeLessThanOrEqual(1)
+
+  const gallery = page.locator('main > div.grid > div').first()
+  await expect(gallery.getByRole('link', { name: 'Voltar ao catálogo' })).toBeVisible()
+  await expect(gallery.getByRole('button', { name: 'Adicionar aos favoritos' })).toBeVisible()
+  const bg = await gallery.evaluate(element => getComputedStyle(element).backgroundImage)
+  expect(bg).toContain('gradient')
+
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect(toolbar).toBeInViewport()
+  const after = await toolbar.evaluate(element => Math.abs(window.innerHeight - element.getBoundingClientRect().bottom))
+  expect(after).toBeLessThanOrEqual(1)
+})

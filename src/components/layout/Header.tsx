@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { pageShellClass } from './pageShell'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Search, ShoppingCart, LogIn } from 'lucide-react'
 import { CatalogSearchInput } from '@/features/nft/components/CatalogSearchInput'
@@ -8,17 +9,19 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const hash = useRouterState({ select: (state) => state.location.hash })
   const onHome = pathname === '/'
+  const onMarket = pathname.startsWith('/nft/') || (onHome && hash === 'catalog')
   const { data: cart } = useCart()
   const { user } = useAuth()
   const count = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0
   return (
     <header className="relative z-20 hidden border-b border-[#3b2a22] bg-[#160e0b] text-[#f4ede5] lg:block">
-      <div className={`mx-auto grid h-16 grid-cols-[1fr_auto_1fr] items-center px-8 ${onHome ? "max-w-[1080px]" : "max-w-7xl"}`}>
+      <div className={`${pageShellClass} grid h-16 grid-cols-[1fr_auto_1fr] items-center`}>
         <Link to="/" className="w-fit font-mono text-sm font-bold tracking-widest">KURIO</Link>
         <nav aria-label="Navegação principal" className="flex h-full items-center gap-8 font-mono text-sm">
-          <Link to="/" className="flex h-full items-center border-b-2 border-[#d38d50] text-[#d38d50]">Início</Link>
-          <span className="text-[#f4ede5]">Mercado</span><span className="text-[#f4ede5]">Criadores</span><span className="text-[#f4ede5]">Aprenda</span>
+          <Link to="/" className={`flex h-full items-center border-b-2 ${onHome && !onMarket ? 'border-[#d38d50] text-[#d38d50]' : 'border-transparent text-[#f4ede5]'}`}>Início</Link>
+          <Link to="/" hash="catalog" aria-current={onMarket ? 'page' : undefined} className={`flex h-full items-center border-b-2 ${onMarket ? 'border-[#d38d50] text-[#d38d50]' : 'border-transparent text-[#f4ede5]'}`}>Mercado</Link><span className="text-[#f4ede5]">Criadores</span><span className="text-[#f4ede5]">Aprenda</span>
         </nav>
         <div className="flex items-center justify-end gap-5">
           <button type="button" disabled={!onHome} aria-label="Buscar NFTs" aria-controls="desktop-nft-search" aria-expanded={searchOpen && onHome} onClick={() => setSearchOpen((open) => !open)} className="text-[#f4ede5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d38d50] disabled:opacity-40"><Search size={19} aria-hidden="true" /></button>

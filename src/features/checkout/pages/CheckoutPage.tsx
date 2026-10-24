@@ -1,4 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
+import { pageShellClass } from '@/components/layout/pageShell'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -89,7 +90,7 @@ export function CheckoutPage() {
   }
 
   const updateBuyer = (fieldName: keyof CheckoutBuyer, value: string) => setBuyer((prev) => ({ ...prev, [fieldName]: value }))
-  return <main className="mx-auto max-w-7xl px-5 pb-32 pt-6 font-mono text-[#f4ede5] lg:px-8 lg:pb-16">
+  return <main className={`${pageShellClass} pb-32 pt-6 font-mono text-[#f4ede5] lg:pb-16`}>
     <Link to="/cart" className="inline-flex items-center gap-2 text-sm text-[#d38d50]"><ArrowLeft size={17}/> Voltar ao carrinho</Link>
     <h1 className="mt-5 text-2xl font-bold lg:text-3xl">Pagamento com carteira</h1>
     <form onSubmit={(event) => void submit(event)} className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
