@@ -1,75 +1,106 @@
-# React + TypeScript + Vite
+# KURIO — NFT Marketplace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Marketplace responsivo de NFTs desenvolvido para o desafio frontend da Jungle Gaming, com API, sessão, carteiras, pagamentos e eventos em tempo real **simulados**.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+React, TypeScript, Vite, TanStack Router, TanStack Query, Axios, Socket.IO Client, MSW, Tailwind CSS e componentes shadcn/ui (Base UI).
 
-## React Compiler
+## Instalação
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Requisitos: Node.js compatível com Vite 8, npm e navegador Chromium.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm ci
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Abra `http://localhost:5173`. Ative o MSW com `.env.development` contendo `VITE_ENABLE_MSW=true`. A aplicação não exige backend privado. Os dados simulados persistem no navegador.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run lint
+npm run build
+npm run preview
 ```
+
+O build de demonstração usa `.env.production` com `VITE_ENABLE_MSW=true`.
+
+## Conta fictícia
+
+- **Colecionador**: `collector@kurio.test`
+- **Artista**: `artist@kurio.test`
+- **Senha de ambas**: `Kurio@123`
+
+Cadastre uma carteira fictícia em `/wallets` informando um endereço no formato `0x` + 40 caracteres hexadecimais. Nenhuma carteira real é conectada.
+
+## Fluxo principal
+
+1. Navegue no catálogo, aplique busca/filtros, abra detalhes do NFT.
+2. Selecione uma edição, ajuste quantidade e adicione ao carrinho.
+3. Faça login para preservar/mesclar o carrinho de visitante.
+4. Cadastre uma carteira no perfil, volte ao carrinho e siga ao checkout.
+5. Preencha nome e e-mail, selecione a carteira e revise a cotação.
+6. Confirme a compra e consulte o status do pedido e o recibo. O pedido confirmado remove do carrinho somente os itens comprados.
+
+## Cenários e reset
+
+Use DevTools > Application > Local Storage do domínio, depois recarregue:
+
+| Cenário | Configuração |
+| --- | --- |
+| Sucesso | Remover `kurio:mock-payment-scenario` |
+| Recusado | `localStorage.setItem('kurio:mock-payment-scenario', 'declined')` |
+| Timeout após criação | `localStorage.setItem('kurio:mock-payment-scenario', 'timeout')` |
+| Carteira desconectada | `localStorage.setItem('kurio:mock-wallet-disconnect', 'true')` |
+| Cupom válido | `KURIO10` |
+| Cupom expirado | `EXPIRED10` |
+| Preço atualizado | `PATCH /api/mock/nfts/:id` com Bearer e `{ "priceEth": "2.50" }` |
+
+Depois do cenário, remova as chaves de teste. **Reset completo:** `localStorage.clear(); sessionStorage.clear(); location.reload()` no Console. Isso apaga o estado simulado, inclusive usuários cadastrados no navegador.
+
+## REST e eventos
+
+As requisições passam pelo Axios em `/api`. Contratos principais:
+
+| Método | Endpoint | Uso |
+| --- | --- | --- |
+| POST | `/auth/register`, `/auth/login`, `/auth/logout` | Conta/sessão |
+| GET | `/auth/session` | Recuperação de sessão |
+| GET | `/nfts`, `/nfts/:id` | Catálogo/detalhes |
+| GET/POST/PATCH/DELETE | `/cart`, `/cart/items`, `/cart/items/:key` | Carrinho |
+| GET/POST/DELETE | `/cart/quote`, `/cart/coupon` | Cotação e cupom |
+| GET/PUT/DELETE | `/favorites`, `/favorites/:id` | Favoritos |
+| GET/PATCH | `/profile`, `/profile/avatar`, `/profile/password` | Dados do colecionador |
+| GET/PUT | `/wallets`, `/wallets/:slot` | Carteiras |
+| POST | `/orders` | Compra com `idempotencyKey` |
+| GET | `/orders/:id`, `/orders/by-key/:key` | Status e recuperação |
+
+O MSW retorna status HTTP como 400/401/404/409/422/500. O cliente Socket.IO escuta `nft.updated` e `order.updated` via `/socket.io/`. Eventos carregam `eventId`, `resourceId`, `version` e detalhes específicos. Os limites do adaptador estão descritos em [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+## Testes E2E
+
+Instale a ferramenta de testes **e atualize o lockfile antes de fazer commit**:
+
+```bash
+npm install -D @playwright/test
+npx playwright install chromium
+npm run build
+npx playwright test
+npx playwright show-report
+```
+
+Os testes em `tests/e2e` utilizam o build de preview, MSW e Chromium nos viewports 1440 e 390. O Playwright cria relatórios HTML em `playwright-report` e traces em caso de falha. Alguns cenários adicionais exigidos pelo enunciado continuam pendentes; ver a auditoria em [ARCHITECTURE.md](./ARCHITECTURE.md). Não declarar suíte aprovada sem executá-la.
+
+## Publicação
+
+`vercel.json` configura fallback de SPA para rotas diretas. Configure Vercel como projeto Vite com comando `npm run build`, diretório `dist` e `VITE_ENABLE_MSW=true`. Teste em produção: recarregar `/login`, `/nft/:id`, `/checkout` e `/orders/:id`; confirmar registro do service worker `/mockServiceWorker.js` e conexão com `/socket.io/`.
+
+**URL pública:** ainda não informada/validada.
+
+## Desempenho
+
+As auditorias Lighthouse e seus resultados medidos ainda não foram executados; não há pontuações a reportar. Recomenda-se auditar build de produção, páginas início e detalhe em desktop/mobile, três execuções cada, e registrar medianas de Performance, Accessibility, Best Practices, SEO, LCP, CLS e TBT.
+
+## Decisões e limitações
+
+Veja [ARCHITECTURE.md](./ARCHITECTURE.md), incluindo persistência, sessões, cache, idempotência, reconexão, desvios visuais do Figma e lacunas de mocks. 

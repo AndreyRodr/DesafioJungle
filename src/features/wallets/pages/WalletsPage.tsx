@@ -39,6 +39,6 @@ export function WalletsPage() {
     <Link to="/profile" className="text-sm text-[#d38d50]">← Voltar ao perfil</Link>
     <h1 className="mt-5 text-3xl font-bold">Minhas carteiras</h1>
     <p className="mt-2 text-sm text-[#b99872]">Gerencie os endereços para o checkout simulado.</p>
-    {isPending ? <p role="status" className="mt-7">Carregando carteiras...</p> : isError ? <p role="alert" className="mt-7">Falha ao buscar carteiras. <button type="button" onClick={() => void refetch()} className="text-[#d38d50] underline">Tentar novamente</button></p> : <div className="mt-8 grid gap-6 lg:grid-cols-2"><WalletForm key={`primary:${data?.find((w) => w.slot === 'primary')?.address ?? 'none'}`} slot="primary" current={data?.find((w) => w.slot === 'primary')} /><WalletForm key={`secondary:${data?.find((w) => w.slot === 'secondary')?.address ?? 'none'}`} slot="secondary" current={data?.find((w) => w.slot === 'secondary')} /></div>}
+    {isPending ? <p role="status" className="mt-7">Carregando carteiras...</p> : isError ? <p role="alert" className="mt-7">Falha ao buscar carteiras. <button type="button" onClick={() => void refetch()} className="text-[#d38d50] underline">Tentar novamente</button></p> : <div className="mt-8 grid gap-6 lg:grid-cols-2"><WalletForm key="primary" slot="primary" current={data?.find((w) => w.slot === 'primary')} /><WalletForm key="secondary" slot="secondary" current={data?.find((w) => w.slot === 'secondary')} /></div>}
   </main>
 }
