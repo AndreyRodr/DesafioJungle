@@ -15,7 +15,7 @@ export function Hero() {
         px-4 py-4
         sm:px-8
         lg:mt-0 lg:overflow-hidden lg:rounded-none
-        lg:bg-none lg:px-8 lg:pb-6 lg:pt-7
+        lg:bg-none lg:px-0 lg:pb-6 lg:pt-7
       "
     >
       {/* Elementos decorativos do fundo mobile */}
