@@ -119,3 +119,31 @@ test('desktop header logo, Entrar and content have the exact same x coordinates 
   expect(market.maxWidth).toBe('1280px')
   expect(home.viewportWidth).toBe(market.viewportWidth)
 })
+
+test('mobile NFT purchase toolbar stays fixed and gallery header has brown background', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes('mobile'), 'Mobile-only layout')
+  await page.goto('/nft/emerald-ape-042')
+  const toolbar = page.getByRole('complementary', { name: 'Barra de compra do NFT' })
+  await expect(toolbar).toBeVisible()
+  await expect(toolbar.getByRole('button', { name: 'Comprar agora' })).toBeVisible()
+  await expect(toolbar.getByRole('button', { name: 'Adicionar ao carrinho' })).toBeVisible()
+  await expect(toolbar.getByRole('spinbutton', { name: 'Quantidade' })).toBeVisible()
+
+  const before = await toolbar.evaluate(element => ({
+    position: getComputedStyle(element).position,
+    bottomGap: Math.abs(window.innerHeight - element.getBoundingClientRect().bottom),
+  }))
+  expect(before.position).toBe('fixed')
+  expect(before.bottomGap).toBeLessThanOrEqual(1)
+
+  const gallery = page.locator('main > div.grid > div').first()
+  await expect(gallery.getByRole('link', { name: 'Voltar ao catálogo' })).toBeVisible()
+  await expect(gallery.getByRole('button', { name: 'Adicionar aos favoritos' })).toBeVisible()
+  const bg = await gallery.evaluate(element => getComputedStyle(element).backgroundImage)
+  expect(bg).toContain('gradient')
+
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect(toolbar).toBeInViewport()
+  const after = await toolbar.evaluate(element => Math.abs(window.innerHeight - element.getBoundingClientRect().bottom))
+  expect(after).toBeLessThanOrEqual(1)
+})
