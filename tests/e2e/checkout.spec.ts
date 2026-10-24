@@ -18,9 +18,13 @@ test('checkout rejects missing wallet with a recovery action', async ({ page }) 
   await page.locator('#catalog article a[href^="/nft/"]').first().click()
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/checkout')
-  const mobile = page.getByRole('region', { name: 'Carteiras no mobile' })
-  const desktop = page.getByRole('region', { name: 'Dados do colecionador' })
-  const scope = (await mobile.isVisible()) ? mobile : desktop
+  // isVisible() consulta imediatamente: durante a hidratação ele retorna false
+  // mesmo quando o layout mobile aparecerá logo em seguida.
+  const mobileProject = test.info().project.name === 'chromium-mobile'
+  const scope = mobileProject
+    ? page.getByRole('region', { name: 'Carteiras no mobile' })
+    : page.getByRole('region', { name: 'Dados do colecionador' })
+  await expect(scope).toBeVisible()
   await expect(scope.getByText(/nenhuma carteira cadastrada/i)).toBeVisible()
   await expect(scope.getByRole('link', { name: 'Cadastrar carteira', exact: true })).toBeVisible()
 })
@@ -38,8 +42,12 @@ test('wallet can be registered; order is confirmed and receipt survives refresh'
   await page.locator('#catalog article a[href^="/nft/"]').first().click()
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/checkout')
-  const mobileBuyer = page.getByRole('button', { name: 'Editar dados do colecionador' })
-  if (await mobileBuyer.isVisible()) await mobileBuyer.click()
+  if (test.info().project.name === 'chromium-mobile') {
+    const mobileBuyer = page.getByRole('button', { name: 'Editar dados do colecionador' })
+    await expect(mobileBuyer).toBeVisible()
+    await mobileBuyer.click()
+  }
+  await expect(page.getByLabel(/nome de exibição/i)).toBeVisible()
   await page.getByLabel(/nome de exibição/i).fill('Colecionador Teste')
   await page.getByLabel(/e-mail/i).fill('collector@kurio.test')
   await page.getByRole('button', { name: /revisar valores atualizados/i }).filter({ visible: true }).click()
