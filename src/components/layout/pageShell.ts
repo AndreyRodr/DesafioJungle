@@ -1,5 +1,5 @@
-/** Shared desktop alignment for navigation, pages and footer (Tailwind max-w-7xl = 1280px). */
-export const pageShellClass = 'mx-auto w-full max-w-7xl px-5 lg:px-8'
+/** Single design-system shell used by navigation, Home, Mercado, checkout and footer. */
+export const pageShellClass = 'kurio-page-shell'
 
-/** The NFT gallery bleeds to screen edges on mobile, matching the Figma detail design. */
-export const pageShellBleedMobileClass = 'mx-auto w-full max-w-7xl px-0 lg:px-8'
+/** Mobile NFT detail art may bleed to the edges; desktop shares the same 1280px shell. */
+export const pageShellBleedMobileClass = 'kurio-page-shell kurio-page-shell--bleed-mobile'
