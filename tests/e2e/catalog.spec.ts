@@ -62,3 +62,23 @@ test('NFT detail keeps edition, quantity and cart interactions on desktop and mo
     await expect(page.getByRole('button', { name: 'Ver imagem 2' })).toHaveAttribute('aria-pressed', 'true')
   }
 })
+
+test('desktop Home and Mercado use the same 1280px content alignment', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), 'Shared desktop shell is measured only at desktop viewport')
+  await page.goto('/')
+  const homeMain = await page.locator('main').first().boundingBox()
+  const homeHeader = await page.locator('header > div').first().boundingBox()
+  expect(homeMain).not.toBeNull()
+  expect(homeHeader).not.toBeNull()
+  expect(Math.abs(homeMain!.x - homeHeader!.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(homeMain!.width - homeHeader!.width)).toBeLessThanOrEqual(1)
+
+  await page.goto('/nft/emerald-ape-042')
+  const marketMain = await page.locator('main').first().boundingBox()
+  const marketHeader = await page.locator('header > div').first().boundingBox()
+  expect(marketMain).not.toBeNull()
+  expect(marketHeader).not.toBeNull()
+  expect(Math.abs(marketMain!.x - homeMain!.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(marketMain!.width - homeMain!.width)).toBeLessThanOrEqual(1)
+  expect(Math.abs(marketMain!.x - marketHeader!.x)).toBeLessThanOrEqual(1)
+})
