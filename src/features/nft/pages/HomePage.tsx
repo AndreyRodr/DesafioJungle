@@ -1,5 +1,6 @@
 import { useSearch, Link } from '@tanstack/react-router'
 import { Hero } from '../../../components/Hero'
+import { HomeJournal, HomePromoBanners } from '../components/HomeEditorialSections'
 import { NFTCard } from '../components/NFTCard'
 import { NFTCardSkeleton } from '../components/NFTCardSkeleton'
 import { CatalogTabs } from '../components/CatalogTabs'
@@ -71,6 +72,8 @@ export function HomePage() {
             </div>
           </div>
         </section>
+        <HomePromoBanners />
+        <HomeJournal />
       </main>
     </>
   )
