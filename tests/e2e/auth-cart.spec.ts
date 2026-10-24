@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 test('login persists after refresh and protected profile opens', async ({ page }) => {
   await page.goto('/login')
   await page.getByLabel('E-mail').fill('collector@kurio.test')
-  await page.getByLabel('Senha').fill('Kurio@123')
+  await page.getByLabel('Senha', { exact: true }).fill('Kurio@123')
   await page.getByRole('button', { name: /^entrar$/i }).click()
   await expect(page).toHaveURL(/\/$/)
   await page.reload()

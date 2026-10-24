@@ -20,16 +20,17 @@ function WalletForm({ slot, current }: { slot: 'primary' | 'secondary'; current?
     try { await mutation.mutateAsync({ slot, label: String(data.get('label') ?? ''), address: String(data.get('address') ?? ''), network: String(data.get('network') ?? 'ethereum') as WalletNetwork }); setMessage('Carteira salva com sucesso.') }
     catch (cause) { setError(apiErrorMessage(cause)) }
   }
-  return <section className="border border-[#503328] bg-[#251711] p-5 sm:p-6">
-    <h2 className="text-xl font-bold">Carteira {slot === 'primary' ? 'principal' : 'secundária'}</h2>
-    <form onSubmit={(event) => void submit(event)} className="mt-5 space-y-5">
-      <div><label htmlFor={`${slot}-label`} className="text-sm">Apelido</label><input id={`${slot}-label`} className={fieldClass} required minLength={2} maxLength={40} name="label" defaultValue={current?.label ?? ''} /></div>
-      <div><label htmlFor={`${slot}-address`} className="text-sm">Endereço EVM</label><input id={`${slot}-address`} className={fieldClass} required pattern="0x[a-fA-F0-9]{40}" title="0x seguido de 40 dígitos hexadecimais" name="address" defaultValue={current?.address ?? ''} placeholder="0x..." /></div>
-      <div><label htmlFor={`${slot}-network`} className="text-sm">Rede</label><select id={`${slot}-network`} className={fieldClass} name="network" defaultValue={current?.network ?? 'ethereum'}><option value="ethereum">Ethereum</option><option value="polygon">Polygon</option><option value="base">Base</option></select></div>
-      <p className="text-xs leading-5 text-[#b99872]">A carteira é apenas simulada: nenhuma extensão ou blockchain será conectada.</p>
-      <button className={actionClass} type="submit" disabled={mutation.isPending}>{mutation.isPending ? 'Salvando...' : 'Salvar carteira'}</button>
-      {message && <p role="status" className="text-sm text-[#d38d50]">{message}</p>}
-      {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+  return <section className="border-b border-[#503328] pb-9 lg:border-none lg:bg-transparent lg:p-0">
+    <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-bold">Carteira {slot === 'primary' ? 'principal' : 'secundária'}</h2><span className="text-sm font-bold text-[#d38d50]">{current ? 'Alterar' : 'Adicionar'}</span></div>
+    {slot === 'primary' && <p className="mt-1 text-xs text-[#b99872]">Estas carteiras ficam disponíveis no pagamento e para receber NFTs comprados.</p>}
+    <form onSubmit={(event) => void submit(event)} className="mt-7 grid gap-x-7 gap-y-5 sm:grid-cols-2">
+      <div><label htmlFor={`${slot}-label`} className="text-sm">Apelido da carteira <span className="text-[#d38d50]">*</span></label><input id={`${slot}-label`} className={fieldClass} required minLength={2} maxLength={40} name="label" defaultValue={current?.label ?? ''} /></div>
+      <div><label htmlFor={`${slot}-address`} className="text-sm">Endereço da carteira <span className="text-[#d38d50]">*</span></label><input id={`${slot}-address`} className={fieldClass} required pattern="0x[a-fA-F0-9]{40}" title="0x seguido de 40 dígitos hexadecimais" name="address" defaultValue={current?.address ?? ''} placeholder="0x..." /></div>
+      <div><label htmlFor={`${slot}-network`} className="text-sm">Rede <span className="text-[#d38d50]">*</span></label><select id={`${slot}-network`} className={fieldClass} name="network" defaultValue={current?.network ?? 'ethereum'}><option value="ethereum">Ethereum</option><option value="polygon">Polygon</option><option value="base">Base</option></select></div>
+      <p className="col-span-full text-xs leading-5 text-[#b99872]">A carteira é simulada: nenhuma extensão ou blockchain será conectada.</p>
+      <button className={actionClass + " sm:w-fit"} type="submit" disabled={mutation.isPending}>{mutation.isPending ? 'Salvando...' : 'Salvar carteira'}</button>
+      {message && <p role="status" className="col-span-full text-sm text-[#d38d50]">{message}</p>}
+      {error && <p role="alert" className="col-span-full text-sm text-red-300">{error}</p>}
     </form>
   </section>
 }
@@ -39,9 +40,8 @@ export function WalletsPage() {
   return <div className={`${pageShellClass} pb-32 pt-8 font-mono text-[#f4ede5] lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8 lg:pb-16`}>
     <ProfileSidebar active="wallets" />
     <main className="min-w-0">
-    <h1 className="mt-5 text-3xl font-bold">Minhas carteiras</h1>
-    <p className="mt-2 text-sm text-[#b99872]">Gerencie os endereços para o checkout simulado.</p>
-    {isPending ? <p role="status" className="mt-7">Carregando carteiras...</p> : isError ? <p role="alert" className="mt-7">Falha ao buscar carteiras. <button type="button" onClick={() => void refetch()} className="text-[#d38d50] underline">Tentar novamente</button></p> : <div className="mt-8 grid gap-6 lg:grid-cols-2"><WalletForm key="primary" slot="primary" current={data?.find((w) => w.slot === 'primary')} /><WalletForm key="secondary" slot="secondary" current={data?.find((w) => w.slot === 'secondary')} /></div>}
+
+    {isPending ? <p role="status" className="mt-7">Carregando carteiras...</p> : isError ? <p role="alert" className="mt-7">Falha ao buscar carteiras. <button type="button" onClick={() => void refetch()} className="text-[#d38d50] underline">Tentar novamente</button></p> : <div className="grid gap-9"><WalletForm key="primary" slot="primary" current={data?.find((w) => w.slot === 'primary')} /><WalletForm key="secondary" slot="secondary" current={data?.find((w) => w.slot === 'secondary')} /></div>}
     </main>
   </div>
 }
