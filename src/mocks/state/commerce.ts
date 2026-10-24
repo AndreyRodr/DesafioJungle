@@ -81,6 +81,11 @@ export function getNftDetail(id: string): NFTDetail | undefined {
   return {
     ...nft,
     creator: 'Kurio Studio',
+    collection: 'Kurio Apes',
+    tokenId: nft.id === 'emerald-ape-042' ? '#0042' : `#${nft.id.split('-').at(-1) ?? nft.id}`,
+    attributes: nft.id === 'emerald-ape-042' ? ['Óculos', 'Esmeralda', 'Raro'] : [nft.category, nft.network],
+    rating: 4.8,
+    reviewCount: 19,
     description: `Conheça ${nft.name}, uma peça digital da coleção Kurio. Edições e disponibilidade são simuladas para o desafio.`,
     gallery: [nft.imageUrl],
     editions: getEditions(nft),
