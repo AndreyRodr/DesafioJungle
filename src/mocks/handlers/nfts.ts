@@ -53,7 +53,7 @@ export const nftHandlers = [
       return b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id)
     })
 
-    const pageSize = 8
+    const pageSize = 9
     const requestedPage = Number(url.searchParams.get('page') ?? 1)
     const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
     const page = Number.isInteger(requestedPage) && requestedPage > 0

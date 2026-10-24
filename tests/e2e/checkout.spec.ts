@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('checkout rejects missing wallet with a recovery action', async ({ page }) => {
-  await page.locator('a[href^="/nft/"]').first().click()
+  await page.locator('#catalog article a[href^="/nft/"]').first().click()
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/checkout')
   await expect(page.getByText(/nenhuma carteira cadastrada/i)).toBeVisible()
@@ -32,7 +32,7 @@ test('wallet can be registered; order is confirmed and receipt survives refresh'
   await expect(page.getByRole('status').filter({ hasText: /carteira salva com sucesso/i })).toBeVisible()
 
   await page.goto('/')
-  await page.locator('a[href^="/nft/"]').first().click()
+  await page.locator('#catalog article a[href^="/nft/"]').first().click()
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/checkout')
   await page.getByLabel(/nome de exibição/i).fill('Colecionador Teste')

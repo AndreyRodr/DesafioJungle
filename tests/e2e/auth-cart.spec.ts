@@ -27,7 +27,7 @@ test('a visitor is redirected to login for protected checkout', async ({ page })
 
 test('cart survives refresh and discount API accepts KURIO10', async ({ page }) => {
   await page.goto('/')
-  await page.locator('a[href^="/nft/"]').first().click()
+  await page.locator('#catalog article a[href^="/nft/"]').first().click()
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/cart')
   await expect(page.getByRole('heading', { name: /carrinho de nfts/i })).toBeVisible()

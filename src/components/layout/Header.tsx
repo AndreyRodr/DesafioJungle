@@ -14,7 +14,7 @@ export function Header() {
   const count = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0
   return (
     <header className="relative z-20 hidden border-b border-[#3b2a22] bg-[#160e0b] text-[#f4ede5] lg:block">
-      <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-8">
+      <div className={`mx-auto grid h-16 grid-cols-[1fr_auto_1fr] items-center px-8 ${onHome ? "max-w-[1080px]" : "max-w-7xl"}`}>
         <Link to="/" className="w-fit font-mono text-sm font-bold tracking-widest">KURIO</Link>
         <nav aria-label="Navegação principal" className="flex h-full items-center gap-8 font-mono text-sm">
           <Link to="/" className="flex h-full items-center border-b-2 border-[#d38d50] text-[#d38d50]">Início</Link>

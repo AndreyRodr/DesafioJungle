@@ -1,14 +1,13 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
-import { Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { changePassword, getProfile, updateAvatar, updateProfile } from '@/features/auth/api/auth'
-import { useAuth, useAuthActions } from '@/features/auth/hooks/useAuth'
+import { useAuth } from '@/features/auth/hooks/useAuth'
+import { ProfileSidebar } from '../components/ProfileSidebar'
 import { actionClass, fieldClass } from '@/features/auth/components/AuthLayout'
 import { apiErrorMessage } from '@/features/auth/lib/errors'
 
 export function ProfilePage() {
   const { user } = useAuth()
-  const { logout } = useAuthActions()
   const client = useQueryClient()
   const { data: profile, isPending, isError, refetch } = useQuery({ queryKey: ['profile', user?.id], queryFn: getProfile, enabled: Boolean(user) })
   const [message, setMessage] = useState('')
@@ -47,25 +46,25 @@ export function ProfilePage() {
       form.reset(); setMessage('Senha alterada com sucesso.')
     } catch (cause) { setError(apiErrorMessage(cause)) }
   }
-  async function signOut() { try { await logout() } finally { window.location.assign('/') } }
-  return <main className="mx-auto max-w-4xl px-5 pb-32 pt-10 font-mono text-[#f4ede5] lg:pb-16">
+  return <div className="mx-auto max-w-7xl px-5 pb-32 pt-8 font-mono text-[#f4ede5] lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8 lg:px-8 lg:pb-16">
+    <ProfileSidebar active="profile" />
+    <main className="min-w-0">
     <h1 className="text-3xl font-bold">Perfil do colecionador</h1>
-    <div className="mt-4 flex flex-wrap gap-5 text-sm"><Link to="/wallets" className="text-[#d38d50] underline">Minhas carteiras</Link><Link to="/favorites" className="text-[#d38d50] underline">Favoritos</Link><button type="button" onClick={() => void signOut()} className="text-[#d38d50] underline">Sair da conta</button></div>
     {isPending ? <p role="status" className="mt-6">Carregando dados...</p> : isError || !profile ? <p role="alert" className="mt-6 text-red-300">Falha ao carregar perfil. <button type="button" onClick={() => void refetch()} className="text-[#d38d50] underline">Tentar novamente</button></p> : <>
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-[#503328] bg-[#251711] p-6">
+      <div className="mt-8 space-y-10">
+        <section className="border-b border-[#503328] pb-8 lg:border-b-0">
           <h2 className="text-xl font-bold">Informações pessoais</h2>
           <div className="mt-5 flex items-center gap-4">
             {profile.avatarUrl ? <img src={profile.avatarUrl} alt="Avatar do perfil" className="h-20 w-20 rounded-full object-cover" /> : <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#503328] text-3xl">{profile.name.charAt(0)}</div>}
             <div><label htmlFor="avatar-input" className="block text-sm">Alterar avatar</label><input id="avatar-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => void uploadAvatar(event)} className="mt-2 w-full max-w-52 text-xs" /><p className="mt-1 text-xs text-[#b99872]">PNG, JPG ou WebP, até 250 KB</p></div>
           </div>
-          <form key={`${profile.name}|${profile.email}`} onSubmit={(event) => void savePersonal(event)} className="mt-6 space-y-4">
+          <form key={`${profile.name}|${profile.email}`} onSubmit={(event) => void savePersonal(event)} className="mt-6 grid gap-5 sm:grid-cols-2">
             <div><label htmlFor="profile-name" className="text-sm">Nome</label><input id="profile-name" name="name" className={fieldClass} required minLength={2} maxLength={80} defaultValue={profile.name} /></div>
             <div><label htmlFor="profile-email" className="text-sm">E-mail</label><input id="profile-email" name="email" className={fieldClass} required type="email" defaultValue={profile.email} /></div>
             <button className={actionClass} disabled={personalMutation.isPending || avatarMutation.isPending} type="submit">Salvar alterações</button>
           </form>
         </section>
-        <section className="rounded-xl border border-[#503328] bg-[#251711] p-6">
+        <section className="border-b border-[#503328] pb-8 lg:border-b-0">
           <h2 className="text-xl font-bold">Alterar senha</h2>
           <form onSubmit={(event) => void updatePassword(event)} className="mt-6 space-y-4">
             <div><label htmlFor="password-current" className="text-sm">Senha atual</label><input id="password-current" name="currentPassword" className={fieldClass} type="password" autoComplete="current-password" required /></div>
@@ -78,5 +77,6 @@ export function ProfilePage() {
       {message && <p role="status" className="mt-5 text-sm text-[#d38d50]">{message}</p>}
       {error && <p role="alert" className="mt-5 text-sm text-red-300">{error}</p>}
     </>}
-  </main>
+    </main>
+  </div>
 }

@@ -23,7 +23,7 @@ export async function getNfts(
       ...(filters.maxPrice && { maxPrice: filters.maxPrice }),
       ...(filters.sort !== 'recent' && { sort: filters.sort }),
       page: filters.page,
-      pageSize: 8,
+      pageSize: 9,
     },
     signal,
   })
