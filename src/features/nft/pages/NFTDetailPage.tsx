@@ -62,8 +62,8 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
   return <>
     <div className="hidden lg:block"><p className="mb-5 text-xs text-[#f4ede5]"><Link to="/" className="hover:text-[#d38d50]">Início</Link> / Mercado</p></div>
     <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
-      <div className="relative">
-        <div className="mb-3 flex items-center justify-between lg:hidden">
+      <div className="relative rounded-t-[40px] bg-[radial-gradient(circle_at_30%_0%,#483024_0%,#2c1b16_60%,#251711_100%)] px-6 pb-10 pt-5 lg:rounded-none lg:bg-transparent lg:p-0">
+        <div className="mb-4 flex items-center justify-between lg:hidden">
           <Link to="/" aria-label="Voltar ao catálogo" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#503328] text-[#d2bdab]"><ArrowLeft size={23}/></Link>
           <FavoriteButton nftId={nft.id} />
         </div>
@@ -71,13 +71,13 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
           <div className="hidden flex-col justify-between gap-3 lg:flex" aria-label="Miniaturas do NFT">
             {Array.from({ length: 4 }, (_,i) => <button type="button" key={i} aria-label={`Ver imagem ${i+1}`} aria-pressed={imageIndex === i} onClick={() => setImageIndex(i)} className={`overflow-hidden rounded-lg border-2 focus-visible:outline-2 focus-visible:outline-[#d38d50] ${imageIndex === i ? 'border-[#d38d50]' : 'border-transparent'}`}><img src={images[i % images.length]} alt="" className="aspect-square w-full object-cover" style={{objectPosition: i===1 ? '45% center' : i===2 ? '55% center' : 'center'}}/></button>)}
           </div>
-          <div className="relative overflow-hidden rounded-2xl bg-[#291b15] p-3 lg:rounded-lg">
+          <div className="relative overflow-hidden rounded-2xl bg-transparent p-0 lg:rounded-lg lg:bg-[#291b15] lg:p-3">
             <img src={images[imageIndex % images.length]} alt={`Arte digital ${nft.name}`} className="aspect-square w-full rounded-xl object-cover" fetchPriority="high"/>
             <button type="button" aria-label="Ampliar imagem" onClick={() => setZoom(true)} className="absolute right-5 top-5 hidden h-9 w-9 items-center justify-center rounded-full bg-[#251711]/80 text-[#f4ede5] lg:flex"><Search size={19}/></button>
           </div>
         </div>
       </div>
-      <section className="-mt-7 rounded-t-[34px] bg-[#251711] px-5 pb-8 pt-7 font-mono lg:mt-0 lg:rounded-none lg:bg-transparent lg:px-0 lg:pt-0">
+      <section className="relative z-10 -mt-16 rounded-t-[34px] bg-[#251711] px-5 pb-8 pt-7 font-mono lg:mt-0 lg:rounded-none lg:bg-transparent lg:px-0 lg:pt-0">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-2xl font-bold leading-tight text-[#f4ede5] lg:text-3xl">{nft.name}</h1>
           <span className="inline-flex items-center gap-1 rounded-full border border-[#d38d50] px-2 py-1 text-sm text-[#f4ede5] lg:hidden"><Star fill="#d38d50" color="#d38d50" size={16}/>{nft.rating?.toFixed(1)} ({nft.reviewCount})</span>
@@ -102,15 +102,8 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
           <p>Coleção: {nft.collection}</p>
           <p>Atributos: {nft.attributes.join(', ')}</p>
         </div>
-        <div className="mt-8 rounded-3xl bg-[#281913] px-4 py-5 lg:hidden">
-          <div className="flex items-center justify-between gap-2"><span className="text-sm text-[#b99872]">Qtd.</span>{quantityControl}<strong className="text-lg text-[#d38d50]">{edition?.priceEth ?? nft.priceEth} ETH</strong></div>
-          <div className="mt-5 flex gap-3">
-            <button type="button" disabled={max===0||add.isPending} onClick={() => void handleAdd(true)} aria-label="Comprar agora" className="min-h-13 flex-1 rounded-full bg-[#d38d50] px-4 py-3 text-sm font-bold text-[#160e0b] disabled:opacity-50">Comprar NFT</button>
-            <button type="button" disabled={max===0||add.isPending} onClick={() => void handleAdd(false)} aria-label="Adicionar ao carrinho" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#503328] text-[#b99872] disabled:opacity-50"><ShoppingCart size={23}/></button>
-          </div>
-        </div>
-        {add.isError && <p role="alert" className="mt-3 text-sm text-red-300">{errorMessage(add.error)}</p>}
-        {message && <p role="status" className="mt-3 text-sm text-[#d38d50]">{message} <Link to="/cart" className="underline">Ver carrinho</Link></p>}
+        {add.isError && <p role="alert" className="mt-3 hidden text-sm text-red-300 lg:block">{errorMessage(add.error)}</p>}
+        {message && <p role="status" className="mt-3 hidden text-sm text-[#d38d50] lg:block">{message} <Link to="/cart" className="underline">Ver carrinho</Link></p>}
         <p className="mt-6 hidden items-center gap-2 text-xs text-[#f4ede5] lg:flex">Compartilhar este NFT: <Mail size={15}/></p>
       </section>
     </div>
@@ -126,6 +119,36 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
       {recommendations.length > 0 ? <div className="mt-6 grid grid-cols-5 gap-4">{recommendations.map(item => <NFTCard key={item.id} nft={item}/>)}</div> : <p className="py-6 text-xs text-[#b99872]">Nenhuma outra obra disponível.</p>}
       <div className="mt-5 flex justify-center gap-2" aria-hidden="true"><span className="h-2 w-2 rounded-full border border-[#d38d50]"/><span className="h-2 w-2 rounded-full bg-[#d38d50]"/><span className="h-2 w-2 rounded-full border border-[#d38d50]"/></div>
     </section>
+    <aside
+      aria-label="Barra de compra do NFT"
+      className="fixed inset-x-0 bottom-0 z-50 rounded-t-[34px] border-t border-[#503328]/40 bg-[#251711] px-5 pt-5 pb-[max(16px,env(safe-area-inset-bottom))] font-mono shadow-[0_-16px_50px_rgba(0,0,0,0.45)] lg:hidden"
+    >
+      <div className="mx-auto max-w-xl">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-[#b99872]">Qtd.</span>
+          {quantityControl}
+          <strong className="whitespace-nowrap text-lg font-bold text-[#d38d50]">{edition?.priceEth ?? nft.priceEth} ETH</strong>
+        </div>
+        <div className="mt-5 flex items-center gap-3">
+          <button
+            type="button"
+            disabled={max === 0 || add.isPending}
+            onClick={() => void handleAdd(true)}
+            aria-label="Comprar agora"
+            className="min-h-12 flex-1 rounded-full bg-[#d38d50] px-4 py-3 text-sm font-bold text-[#160e0b] disabled:opacity-50"
+          >{add.isPending ? 'Adicionando…' : 'Comprar NFT'}</button>
+          <button
+            type="button"
+            disabled={max === 0 || add.isPending}
+            onClick={() => void handleAdd(false)}
+            aria-label="Adicionar ao carrinho"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#503328] text-[#b99872] disabled:opacity-50"
+          ><ShoppingCart size={23} aria-hidden="true"/></button>
+        </div>
+        {add.isError && <p role="alert" className="mt-2 text-xs text-red-300">{errorMessage(add.error)}</p>}
+        {message && <p role="status" className="mt-2 text-xs text-[#d38d50]">{message} <Link to="/cart" className="underline">Ver carrinho</Link></p>}
+      </div>
+    </aside>
     {zoom && <div role="dialog" aria-modal="true" aria-label="Visualizar imagem do NFT" className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-8" onClick={() => setZoom(false)}><button type="button" autoFocus onClick={() => setZoom(false)} className="absolute right-6 top-6 rounded bg-[#d38d50] px-4 py-2 font-mono font-bold text-[#160e0b]">Fechar</button><img src={images[imageIndex % images.length]} alt={`Arte digital ampliada ${nft.name}`} className="max-h-full max-w-full object-contain"/></div>}
   </>
 }
@@ -135,7 +158,7 @@ export function NFTDetailPage() {
   const { data, isPending, isError, error, refetch } = useNft(nftId)
   const notFound = isAxiosError(error) && error.response?.status === 404
   return (
-    <main className={`${pageShellBleedMobileClass} pb-28 pt-0 text-[#f4ede5] lg:pb-16 lg:pt-7`}>
+    <main className={`${pageShellBleedMobileClass} pb-60 pt-0 text-[#f4ede5] lg:pb-16 lg:pt-7`}>
       {isPending ? <div role="status" aria-label="Carregando NFT" className="grid gap-7 p-5 lg:grid-cols-2"><div className="nft-shimmer aspect-square rounded-3xl"/><div className="space-y-4"><div className="nft-shimmer h-10 w-3/4 rounded"/><div className="nft-shimmer h-5 w-full rounded"/><div className="nft-shimmer h-40 rounded-xl"/></div></div>
         : isError ? <div role="alert" className="m-5 rounded-xl border border-[#503328] bg-[#2a1914] p-8 font-mono"><h1 className="text-2xl">{notFound ? 'NFT não encontrado' : 'Falha ao carregar NFT'}</h1><p className="mt-3 text-sm text-[#b99872]">{notFound ? 'Este item não existe no catálogo.' : 'Não foi possível consultar o detalhe.'}</p>{!notFound && <button type="button" onClick={() => void refetch()} className="mt-5 text-[#d38d50] underline">Tentar novamente</button>}</div>
         : data ? <DetailContent key={data.id} nft={data}/> : null}
