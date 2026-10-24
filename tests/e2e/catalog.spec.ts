@@ -82,3 +82,40 @@ test('desktop Home and Mercado use the same 1280px content alignment', async ({ 
   expect(Math.abs(marketMain!.width - homeMain!.width)).toBeLessThanOrEqual(1)
   expect(Math.abs(marketMain!.x - marketHeader!.x)).toBeLessThanOrEqual(1)
 })
+
+test('desktop header logo, Entrar and content have the exact same x coordinates across routes', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), 'Desktop geometry only')
+  async function geometry() {
+    return page.evaluate(() => {
+      const header = document.querySelector('header > div')
+      const main = document.querySelector('main')
+      const logo = document.querySelector('header a[href="/"]')
+      const login = [...document.querySelectorAll('header a')].find(a => a.textContent?.trim() === 'Entrar')
+      if (!header || !main || !logo || !login) throw new Error('Required navigation and page shell missing')
+      const h = header.getBoundingClientRect()
+      const m = main.getBoundingClientRect()
+      const l = logo.getBoundingClientRect()
+      const b = login.getBoundingClientRect()
+      return {
+        headerLeft: h.left,
+        headerRight: h.right,
+        mainLeft: m.left,
+        mainRight: m.right,
+        logoLeft: l.left,
+        loginRight: b.right,
+        maxWidth: getComputedStyle(header).maxWidth,
+        viewportWidth: window.innerWidth,
+      }
+    })
+  }
+  await page.goto('/')
+  const home = await geometry()
+  await page.goto('/nft/emerald-ape-042')
+  const market = await geometry()
+  for (const key of ['headerLeft', 'headerRight', 'mainLeft', 'mainRight', 'logoLeft', 'loginRight'] as const) {
+    expect(Math.abs(home[key] - market[key]), key).toBeLessThanOrEqual(1)
+  }
+  expect(home.maxWidth).toBe('1280px')
+  expect(market.maxWidth).toBe('1280px')
+  expect(home.viewportWidth).toBe(market.viewportWidth)
+})
