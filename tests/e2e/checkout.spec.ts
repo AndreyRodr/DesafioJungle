@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/login', { waitUntil: 'domcontentloaded' })
   await expect(page.getByLabel('E-mail')).toBeVisible()
   await page.getByLabel('E-mail').fill('collector@kurio.test')
-  await page.getByLabel('Senha').fill('Kurio@123')
+  await page.getByLabel('Senha', { exact: true }).fill('Kurio@123')
   await page.getByRole('button', { name: /^entrar$/i }).click()
   await expect(page).toHaveURL(/\/$/)
 })
