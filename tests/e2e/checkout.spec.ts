@@ -51,8 +51,9 @@ test('checkout keeps Mercado active and shows the Figma payment sections', async
   await page.goto('/checkout')
   await expect(page.getByRole('navigation', { name: 'Caminho do pagamento' })).toContainText('Mercado')
   await expect(page.getByRole('region', { name: 'Dados do colecionador' })).toBeVisible()
-  await expect(page.getByRole('complementary', { name: 'Resumo do pagamento' })).toBeVisible()
-  await expect(page.getByText('Tem um código promocional?')).toBeVisible()
+  if (testInfo.project.name.includes('desktop')) await expect(page.getByRole('complementary', { name: 'Resumo do pagamento' })).toBeVisible()
+  else await expect(page.getByRole('region', { name: 'Seleção de carteira no celular' })).toBeVisible()
+  if (testInfo.project.name.includes('desktop')) await expect(page.getByText('Tem um código promocional?')).toBeVisible()
   if (testInfo.project.name.includes('desktop')) {
     await expect(page.getByRole('navigation', { name: 'Navegação principal' }).getByRole('link', { name: 'Mercado' })).toHaveAttribute('aria-current', 'page')
   }
