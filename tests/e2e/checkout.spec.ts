@@ -42,13 +42,18 @@ test('wallet can be registered; order is confirmed and receipt survives refresh'
   await page.locator('#catalog article a[href^="/nft/"]').first().click()
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/checkout')
-  const buyerFields = page.getByRole('region', { name: 'Dados do colecionador' })
+  // A seção está recolhida no mobile e, por isso, não aparece na árvore
+  // de acessibilidade até que o usuário a expanda.
+  const buyerFields = page.locator('#mobile-buyer-fields')
   if (test.info().project.name === 'chromium-mobile') {
-    // O checkout mobile mostra carteiras e valores primeiro. O comprador já tem
-    // os dados válidos da sessão; a edição é uma ação opcional.
+    const editBuyer = page.getByRole('button', { name: 'Editar dados do colecionador', exact: true })
+    await expect(editBuyer).toBeVisible()
+    await editBuyer.click()
+    await expect(buyerFields).toBeVisible()
     await expect(buyerFields.getByLabel(/nome de exibição/i)).toHaveValue('Colecionador Kurio')
     await expect(buyerFields.getByLabel(/e-mail/i)).toHaveValue('collector@kurio.test')
   } else {
+    await expect(buyerFields).toBeVisible()
     await buyerFields.getByLabel(/nome de exibição/i).fill('Colecionador Teste')
     await buyerFields.getByLabel(/e-mail/i).fill('collector@kurio.test')
   }
