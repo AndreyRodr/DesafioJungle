@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
+import { pageShellClass } from '@/components/layout/pageShell'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { changePassword, getProfile, updateAvatar, updateProfile } from '@/features/auth/api/auth'
 import { useAuth } from '@/features/auth/hooks/useAuth'
@@ -46,7 +47,7 @@ export function ProfilePage() {
       form.reset(); setMessage('Senha alterada com sucesso.')
     } catch (cause) { setError(apiErrorMessage(cause)) }
   }
-  return <div className="mx-auto max-w-7xl px-5 pb-32 pt-8 font-mono text-[#f4ede5] lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8 lg:px-8 lg:pb-16">
+  return <div className={`${pageShellClass} pb-32 pt-8 font-mono text-[#f4ede5] lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8 lg:pb-16`}>
     <ProfileSidebar active="profile" />
     <main className="min-w-0">
     <h1 className="text-3xl font-bold">Perfil do colecionador</h1>
