@@ -19,7 +19,7 @@ test('checkout rejects missing wallet with a recovery action', async ({ page }) 
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/checkout')
   await expect(page.getByText(/nenhuma carteira cadastrada/i)).toBeVisible()
-  await expect(page.getByRole('link', { name: /cadastrar carteira/i })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Cadastrar carteira', exact: true })).toBeVisible()
 })
 
 test('wallet can be registered; order is confirmed and receipt survives refresh', async ({ page }) => {
@@ -29,7 +29,7 @@ test('wallet can be registered; order is confirmed and receipt survives refresh'
   await primary.locator('input[name="address"]').fill('0x1234567890123456789012345678901234567890')
   await primary.locator('select[name="network"]').selectOption('ethereum')
   await primary.getByRole('button', { name: /salvar carteira/i }).click()
-  await expect(primary.getByText(/carteira salva com sucesso/i)).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: /carteira salva com sucesso/i })).toBeVisible()
 
   await page.goto('/')
   await page.locator('a[href^="/nft/"]').first().click()
