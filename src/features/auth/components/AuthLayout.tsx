@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Hero } from '@/components/Hero'
+import { pageShellClass } from '@/components/layout/pageShell'
 
 export function AuthLayout({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   const isLogin = title.toLocaleLowerCase('pt-BR').includes('entrar')
   return <main className="relative min-h-[100dvh] px-6 pb-20 pt-16 font-mono text-[#f4ede5] lg:min-h-[800px] lg:py-12">
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-60 lg:block">
-      <div className="mx-auto max-w-6xl"><Hero /></div>
+      <div className={pageShellClass}><Hero /></div>
     </div>
     <div className="pointer-events-none absolute inset-0 hidden bg-[#160e0b]/50 lg:block" aria-hidden="true" />
     <div className="relative mx-auto flex w-full max-w-md flex-col items-center lg:max-w-[400px]">
