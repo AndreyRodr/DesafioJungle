@@ -11,7 +11,7 @@ export function Header() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const hash = useRouterState({ select: (state) => state.location.hash })
   const onHome = pathname === '/'
-  const onMarket = pathname.startsWith('/nft/') || pathname === '/cart' || (onHome && hash === 'catalog')
+  const onMarket = pathname.startsWith('/nft/') || (pathname === '/cart' || pathname === '/checkout' || pathname.startsWith('/orders/')) || (onHome && hash === 'catalog')
   const { data: cart } = useCart()
   const { user } = useAuth()
   const count = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0
