@@ -176,3 +176,45 @@ body {
 @media (max-width: 1023px) {
   .kurio-page-shell--bleed-mobile { padding-inline: 0; }
 }
+
+/* Checkout controls: consistent dimensions and dark native dropdown palettes. */
+.kurio-checkout-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin-top: 8px;
+  border: 1px solid #503328;
+  border-radius: 4px;
+  background-color: #251711;
+  color: #f4ede5;
+  font-size: 14px;
+  line-height: 20px;
+  outline-offset: 2px;
+}
+.kurio-checkout-field:is(input, select) {
+  height: 44px;
+  padding: 0 12px;
+}
+.kurio-checkout-field:where(textarea) {
+  min-height: 96px;
+  padding: 12px;
+}
+.kurio-checkout-field:focus-visible,
+.kurio-checkout-ens:focus-within {
+  outline: 2px solid #d38d50;
+}
+.kurio-checkout-field:read-only {
+  color: #d2bdab;
+}
+.kurio-checkout-field:is(select),
+.kurio-checkout-ens-suffix {
+  color-scheme: dark;
+  background-color: #251711;
+  color: #f4ede5;
+}
+.kurio-checkout-field option,
+.kurio-checkout-ens-suffix option {
+  background-color: #251711;
+  color: #f4ede5;
+}
