@@ -42,16 +42,22 @@ test('wallet can be registered; order is confirmed and receipt survives refresh'
   await page.locator('#catalog article a[href^="/nft/"]').first().click()
   await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
   await page.goto('/checkout')
+  const buyerFields = page.getByRole('region', { name: 'Dados do colecionador' })
   if (test.info().project.name === 'chromium-mobile') {
-    const mobileBuyer = page.getByRole('button', { name: 'Editar dados do colecionador' })
-    await expect(mobileBuyer).toBeVisible()
-    await mobileBuyer.click()
+    // O checkout mobile mostra carteiras e valores primeiro. O comprador já tem
+    // os dados válidos da sessão; a edição é uma ação opcional.
+    await expect(buyerFields.getByLabel(/nome de exibição/i)).toHaveValue('Colecionador Kurio')
+    await expect(buyerFields.getByLabel(/e-mail/i)).toHaveValue('collector@kurio.test')
+  } else {
+    await buyerFields.getByLabel(/nome de exibição/i).fill('Colecionador Teste')
+    await buyerFields.getByLabel(/e-mail/i).fill('collector@kurio.test')
   }
-  await expect(page.getByLabel(/nome de exibição/i)).toBeVisible()
-  await page.getByLabel(/nome de exibição/i).fill('Colecionador Teste')
-  await page.getByLabel(/e-mail/i).fill('collector@kurio.test')
-  await page.getByRole('button', { name: /revisar valores atualizados/i }).filter({ visible: true }).click()
-  await page.getByRole('button', { name: /confirmar compra/i }).filter({ visible: true }).click()
+  const review = page.getByRole('button', { name: /revisar valores atualizados/i }).filter({ visible: true })
+  await expect(review).toBeEnabled({ timeout: 10000 })
+  await review.click()
+  const confirm = page.getByRole('button', { name: /confirmar compra/i }).filter({ visible: true })
+  await expect(confirm).toBeEnabled({ timeout: 10000 })
+  await confirm.click()
   await expect(page).toHaveURL(/\/orders\//)
   await expect(page.getByRole('heading', { name: /pedido confirmado/i })).toBeVisible({ timeout: 15000 })
   await page.reload()
