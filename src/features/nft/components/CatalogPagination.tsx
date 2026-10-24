@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { ChevronRight } from 'lucide-react'
 
 interface CatalogPaginationProps { page: number; totalPages: number }
 
@@ -14,6 +15,7 @@ export function CatalogPagination({ page, totalPages }: CatalogPaginationProps) 
           className={`inline-flex h-10 w-10 items-center justify-center rounded text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d38d50] ${number === page ? 'bg-[#d38d50] text-[#160e0b]' : 'border border-[#503328] bg-[#251711] text-[#f4ede5] hover:border-[#d38d50]'}`}
         >{number}</Link>
       ))}
+      {page < totalPages && <Link to="/" search={previous => ({ ...previous, page: page + 1 })} hash="catalog" aria-label="Próxima página" className="inline-flex h-10 w-10 items-center justify-center rounded border border-[#503328] bg-[#251711] text-[#f4ede5] hover:border-[#d38d50] focus-visible:outline-2 focus-visible:outline-[#d38d50]"><ChevronRight size={18} aria-hidden="true" /></Link>}
     </nav>
   )
 }
