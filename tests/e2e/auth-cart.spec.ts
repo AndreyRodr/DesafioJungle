@@ -56,3 +56,26 @@ test('cart uses rectangular line items and offers collector recommendations', as
   await page.reload()
   await expect(items.locator('article')).toHaveCount(1)
 })
+
+test('mobile checkout summary stays fixed and recommendations remain below cart items', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes('mobile'), 'Mobile-only layout')
+  await page.goto('/')
+  await page.locator('#catalog article a[href^="/nft/"]').first().click()
+  await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
+  await page.goto('/cart')
+  const summary = page.getByRole('complementary', { name: 'Resumo do carrinho' })
+  await expect(summary).toBeVisible()
+  await expect(summary.getByPlaceholder('Código do cupom')).toBeVisible()
+  await expect(summary.getByRole('link', { name: 'Conectar e finalizar' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Colecionadores também viram' })).toBeAttached()
+  const before = await summary.evaluate(node => ({
+    position: getComputedStyle(node).position,
+    bottom: node.getBoundingClientRect().bottom,
+    viewport: window.innerHeight,
+  }))
+  expect(before.position).toBe('fixed')
+  expect(Math.abs(before.viewport - before.bottom)).toBeLessThanOrEqual(1)
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  const after = await summary.evaluate(node => Math.abs(window.innerHeight - node.getBoundingClientRect().bottom))
+  expect(after).toBeLessThanOrEqual(1)
+})
