@@ -66,8 +66,8 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
           <Link to="/" aria-label="Voltar ao catálogo" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#503328] text-[#d2bdab]"><ArrowLeft size={23}/></Link>
           <FavoriteButton nftId={nft.id} />
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[72px_minmax(0,1fr)]">
-          <div className="hidden flex-col gap-3 lg:flex" aria-label="Miniaturas do NFT">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[84px_minmax(0,1fr)]">
+          <div className="hidden flex-col justify-between gap-3 lg:flex" aria-label="Miniaturas do NFT">
             {Array.from({ length: 4 }, (_,i) => <button type="button" key={i} aria-label={`Ver imagem ${i+1}`} aria-pressed={imageIndex === i} onClick={() => setImageIndex(i)} className={`overflow-hidden rounded-lg border-2 focus-visible:outline-2 focus-visible:outline-[#d38d50] ${imageIndex === i ? 'border-[#d38d50]' : 'border-transparent'}`}><img src={images[i % images.length]} alt="" className="aspect-square w-full object-cover" style={{objectPosition: i===1 ? '45% center' : i===2 ? '55% center' : 'center'}}/></button>)}
           </div>
           <div className="relative overflow-hidden rounded-2xl bg-[#291b15] p-3 lg:rounded-lg">
@@ -92,6 +92,7 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
           {quantityControl}
           <div className="flex items-center gap-2">
             <button type="button" disabled={max===0||add.isPending} onClick={() => void handleAdd(true)} className="min-w-32 rounded bg-[#d38d50] px-5 py-3 text-sm font-bold text-[#160e0b] disabled:opacity-50">Comprar agora</button>
+            <button type="button" disabled={max===0||add.isPending} onClick={() => void handleAdd(false)} className="inline-flex min-h-11 items-center gap-2 rounded border border-[#d38d50] px-3 text-xs font-bold text-[#d38d50] disabled:opacity-50"><ShoppingCart size={17}/>Adicionar ao carrinho</button>
             <FavoriteButton nftId={nft.id}/>
           </div>
         </div>
@@ -117,7 +118,7 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
         <button type="button" onClick={() => setTab('details')} className={`pb-3 text-sm ${tab === 'details' ? 'border-b-2 border-[#d38d50] font-bold text-[#d38d50]' : 'text-[#b99872]'}`}>Detalhes do NFT</button>
         <button type="button" onClick={() => setTab('reviews')} className={`pb-3 text-sm ${tab === 'reviews' ? 'border-b-2 border-[#d38d50] font-bold text-[#d38d50]' : 'text-[#b99872]'}`}>Avaliações de colecionadores ({nft.reviewCount})</button>
       </div>
-      {tab === 'details' ? <div className="space-y-4 py-5 text-sm leading-7 text-[#b99872]"><p>{nft.description} Cada edição pertence ao catálogo demonstrativo da Kurio.</p><p>A obra explora identidade e cultura digital. A compra, as carteiras e as referências de transação são simuladas.</p><p><strong className="text-[#f4ede5]">Rede:</strong> {nft.network}</p><p><strong className="text-[#f4ede5]">Coleção:</strong> {nft.collection}</p><p><strong className="text-[#f4ede5]">ID do token:</strong> {nft.tokenId}</p></div> : <p className="py-6 text-sm text-[#b99872]">Nota ilustrativa de {nft.rating?.toFixed(1)} ({nft.reviewCount} avaliações). Não há relatos individuais disponíveis no cenário simulado.</p>}
+      {tab === 'details' ? <div className="space-y-4 py-5 text-sm leading-7 text-[#b99872]"><p>{nft.description} Cada edição pertence ao catálogo demonstrativo da Kurio.</p><p>A obra explora identidade e cultura digital. A compra, as carteiras e as referências de transação são simuladas.</p><p><strong className="text-[#f4ede5]">Rede:</strong> {nft.network}</p><p><strong className="text-[#f4ede5]">Contrato:</strong> Simulado para demonstração — sem contrato blockchain verificado.</p><p><strong className="text-[#f4ede5]">Direitos autorais:</strong> Direitos da obra permanecem com o criador; nenhuma licença de exploração comercial é concedida nesta demonstração.</p></div> : <p className="py-6 text-sm text-[#b99872]">Nota ilustrativa de {nft.rating?.toFixed(1)} ({nft.reviewCount} avaliações). Não há relatos individuais disponíveis no cenário simulado.</p>}
     </section>
     <section className="mt-14 hidden font-mono lg:block">
       <h2 className="border-b border-[#503328] pb-4 text-sm font-bold text-[#d38d50]">Mais desta coleção</h2>
@@ -133,7 +134,7 @@ export function NFTDetailPage() {
   const { data, isPending, isError, error, refetch } = useNft(nftId)
   const notFound = isAxiosError(error) && error.response?.status === 404
   return (
-    <main className="mx-auto w-full max-w-[1150px] px-0 pb-28 pt-0 text-[#f4ede5] lg:px-8 lg:pb-16 lg:pt-7">
+    <main className="mx-auto w-full max-w-7xl px-0 pb-28 pt-0 text-[#f4ede5] lg:px-8 lg:pb-16 lg:pt-7">
       {isPending ? <div role="status" aria-label="Carregando NFT" className="grid gap-7 p-5 lg:grid-cols-2"><div className="nft-shimmer aspect-square rounded-3xl"/><div className="space-y-4"><div className="nft-shimmer h-10 w-3/4 rounded"/><div className="nft-shimmer h-5 w-full rounded"/><div className="nft-shimmer h-40 rounded-xl"/></div></div>
         : isError ? <div role="alert" className="m-5 rounded-xl border border-[#503328] bg-[#2a1914] p-8 font-mono"><h1 className="text-2xl">{notFound ? 'NFT não encontrado' : 'Falha ao carregar NFT'}</h1><p className="mt-3 text-sm text-[#b99872]">{notFound ? 'Este item não existe no catálogo.' : 'Não foi possível consultar o detalhe.'}</p>{!notFound && <button type="button" onClick={() => void refetch()} className="mt-5 text-[#d38d50] underline">Tentar novamente</button>}</div>
         : data ? <DetailContent key={data.id} nft={data}/> : null}
