@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
 
 test('catalog renders and NFT cards navigate to detail', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /catálogo/i })).toHaveCount(0)
-  const cardLink = page.locator('a[href^="/nft/"]').first()
+  const cardLink = page.locator('#catalog a[href^="/nft/"]').first()
   await expect(cardLink).toBeVisible()
   await cardLink.click()
   await expect(page).toHaveURL(/\/nft\/[^/]+/)
