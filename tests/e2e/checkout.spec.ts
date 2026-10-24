@@ -57,3 +57,30 @@ test('checkout keeps Mercado active and shows the Figma payment sections', async
     await expect(page.getByRole('navigation', { name: 'Navegação principal' }).getByRole('link', { name: 'Mercado' })).toHaveAttribute('aria-current', 'page')
   }
 })
+
+test('desktop checkout has Figma wallet metadata fields', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), 'Desktop form only')
+  await page.goto('/checkout')
+  const collector = page.getByRole('region', { name: 'Dados do colecionador' })
+  await expect(collector.getByLabel(/nome de usuário/i)).toBeVisible()
+  await expect(collector.getByLabel(/nome do perfil/i)).toBeVisible()
+  await expect(collector.getByLabel(/endereço da carteira/i)).toBeVisible()
+  await expect(collector.getByLabel(/tipo de carteira/i)).toBeVisible()
+  await expect(collector.getByLabel(/código de indicação/i)).toBeVisible()
+  await expect(collector.getByLabel(/ENS ou carteira secundária/i)).toBeVisible()
+  await expect(collector.getByLabel(/nome de exibição/i)).toHaveAttribute('required', '')
+  await expect(collector.getByLabel(/e-mail/i)).toHaveAttribute('required', '')
+})
+
+test('mobile checkout has a fixed buy button and wallet provider choices', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes('mobile'), 'Mobile only')
+  await page.goto('/checkout')
+  await expect(page.getByRole('heading', { name: 'Pagamento com carteira' }).first()).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Seleção de carteira no celular' })).toBeVisible()
+  const button = page.getByRole('button', { name: 'Confirmar compra' })
+  await expect(button).toBeVisible()
+  const panel = button.locator('..')
+  const before = await panel.evaluate(element => ({ position: getComputedStyle(element).position, bottom: element.getBoundingClientRect().bottom, viewport: window.innerHeight }))
+  expect(before.position).toBe('fixed')
+  expect(Math.abs(before.viewport - before.bottom)).toBeLessThanOrEqual(1)
+})
