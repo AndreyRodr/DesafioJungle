@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { pageShellClass } from './pageShell'
 
 const info = [
   { icon: 'W', title: 'Segurança da carteira', body: 'Proteja sua carteira e colecione arte digital verificada com confiança.' },
@@ -6,7 +7,7 @@ const info = [
   { icon: 'D', title: 'Alertas de lançamentos', body: 'Descubra novas coleções e novidades do mercado.' },
 ]
 export function Footer() {
-  return <footer className="mx-auto hidden w-full max-w-7xl px-8 pb-6 font-mono text-[#f4ede5] lg:block">
+  return <footer className={`${pageShellClass} hidden pb-6 font-mono text-[#f4ede5] lg:block`}>
     <div className="grid grid-cols-4 bg-[#251711] p-6">
       {info.map((item) => <section key={item.title} className="border-r border-[#6a432c] px-4 last:border-r-0">
         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#d38d50] font-bold text-[#160e0b]">{item.icon}</div>
