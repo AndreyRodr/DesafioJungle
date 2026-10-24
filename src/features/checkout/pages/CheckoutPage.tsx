@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -40,16 +40,15 @@ export function CheckoutPage() {
   const [slot, setSlot] = useState<'primary' | 'secondary'>('primary')
   const selectedWallet = wallets.find((wallet) => wallet.slot === slot) ?? wallets[0]
   const [provider, setProvider] = useState<OrderSnapshot['walletProvider']>('coinbase')
-  const [buyer, setBuyer] = useState<CheckoutBuyer>({ displayName: '', email: '' })
+  // O formulário começa com os dados da sessão sem sincronizar estado em useEffect.
+  // undefined significa "usar dado do perfil"; string vazia significa "usuário apagou o campo".
+  const [buyer, setBuyer] = useState<Partial<CheckoutBuyer>>({})
   const [showBuyerOnMobile, setShowBuyerOnMobile] = useState(false)
-  useEffect(() => {
-    if (!user) return
-    setBuyer((previous) => ({
-      ...previous,
-      displayName: previous.displayName || user.name,
-      email: previous.email || user.email,
-    }))
-  }, [user])
+  const checkoutBuyer: CheckoutBuyer = {
+    ...buyer,
+    displayName: buyer.displayName ?? user?.name ?? '',
+    email: buyer.email ?? user?.email ?? '',
+  }
   const [reviewedSignature, setReviewedSignature] = useState<string | null>(null)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
@@ -81,7 +80,7 @@ export function CheckoutPage() {
         setMessage('A cotação foi alterada. Revise os valores novamente antes de comprar.')
         return
       }
-      const payloadBase = { quoteFingerprint: fingerprint, buyer, walletSlot: selectedWallet.slot, walletProvider: provider, network: selectedWallet.network }
+      const payloadBase = { quoteFingerprint: fingerprint, buyer: checkoutBuyer, walletSlot: selectedWallet.slot, walletProvider: provider, network: selectedWallet.network }
       const pendingKey = `kurio:pending-order:${user?.id}`
       const existing = sessionStorage.getItem(pendingKey)
       const stored = existing ? JSON.parse(existing) as { fingerprint: string; key: string } : null
@@ -162,9 +161,9 @@ export function CheckoutPage() {
       <section id="mobile-buyer-fields" aria-label="Dados do colecionador" className={`${showBuyerOnMobile ? 'block' : 'hidden'} space-y-6 lg:block`}>
         <h2 className="text-lg font-bold">Perfil do colecionador</h2>
         <div className="grid gap-5 sm:grid-cols-2">
-          <label className="text-sm">Nome de exibição *<input required minLength={2} maxLength={80} className={field} value={buyer.displayName} onChange={e => updateBuyer('displayName', e.target.value)} autoComplete="name" /></label>
+          <label className="text-sm">Nome de exibição *<input required minLength={2} maxLength={80} className={field} value={checkoutBuyer.displayName} onChange={e => updateBuyer('displayName', e.target.value)} autoComplete="name" /></label>
           <label className="text-sm">Nome de usuário<input className={field} value={user?.name ?? ''} readOnly /></label>
-          <label className="text-sm">E-mail *<input required type="email" className={field} value={buyer.email} onChange={e => updateBuyer('email', e.target.value)} autoComplete="email" /></label>
+          <label className="text-sm">E-mail *<input required type="email" className={field} value={checkoutBuyer.email} onChange={e => updateBuyer('email', e.target.value)} autoComplete="email" /></label>
           <label className="text-sm">Rede selecionada<input readOnly className={field} value={selectedWallet?.network ?? 'Cadastre uma carteira'} /></label>
         </div>
         <h2 className="pt-2 text-lg font-bold">Carteira conectada</h2>
