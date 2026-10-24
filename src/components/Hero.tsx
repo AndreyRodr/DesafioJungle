@@ -14,8 +14,8 @@ export function Hero() {
         bg-[radial-gradient(circle_at_20%_25%,#805638_0%,#4a3021_50%,#251813_100%)]
         px-4 py-4
         sm:px-8
-        lg:mt-0 lg:overflow-visible lg:rounded-none
-        lg:bg-none lg:px-8 lg:py-10
+        lg:mt-0 lg:overflow-hidden lg:rounded-none
+        lg:bg-none lg:px-8 lg:py-12
       "
     >
       {/* Elementos decorativos do fundo mobile */}
@@ -39,10 +39,10 @@ export function Hero() {
 
       <div
         className="
-          relative z-10 grid min-h-[175x]
+          relative z-10 grid min-h-[190px]
           grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]
           items-center gap-3
-          lg:min-h-[370px] lg:grid-cols-2 lg:gap-16
+          lg:min-h-[440px] lg:grid-cols-2 lg:gap-16
         "
       >
         {/* Conteúdo textual */}
@@ -56,7 +56,7 @@ export function Hero() {
             className="
               font-mono text-[clamp(1.15rem,4.7vw,2rem)]
               font-bold leading-[1.3] tracking-tight
-              text-[#f4ede5] lg:text-4xl lg:leading-[1.4]
+              text-[#f4ede5] lg:text-[clamp(2.1rem,3vw,3.1rem)] lg:leading-[1.35]
             "
           >
             <span className="lg:hidden">
@@ -121,7 +121,7 @@ export function Hero() {
             className="
               aspect-square w-full rounded-[20px]
               object-cover
-              lg:mx-auto lg:max-w-[370px]
+              lg:mx-auto lg:max-w-[420px]
             "
           />
 
@@ -139,6 +139,7 @@ export function Hero() {
           />
         </div>
       </div>
+      <div aria-hidden="true" className="relative z-10 mt-5 flex items-center justify-center gap-2 lg:mt-2"><span className="h-2 w-2 rounded-full bg-[#d38d50]" /><span className="h-2 w-2 rounded-full bg-[#85634b]" /><span className="h-2 w-2 rounded-full bg-[#85634b]" /></div>
     </section>
   )
 }
