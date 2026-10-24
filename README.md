@@ -95,11 +95,38 @@ Os testes em `tests/e2e` utilizam o build de preview, MSW e Chromium nos viewpor
 
 `vercel.json` configura fallback de SPA para rotas diretas. Configure Vercel como projeto Vite com comando `npm run build`, diretório `dist` e `VITE_ENABLE_MSW=true`. Teste em produção: recarregar `/login`, `/nft/:id`, `/checkout` e `/orders/:id`; confirmar registro do service worker `/mockServiceWorker.js` e conexão com `/socket.io/`.
 
-**URL pública:** ainda não informada/validada.
+**URL pública:** https://desafionft-marketplace.vercel.app (domínio cadastrado na Vercel; confira acessibilidade pública, service worker e WebSocket na versão publicada).
+
+## Auditoria reproduzível e CI
+
+Ações do GitHub em `.github/workflows/delivery.yml` executam lint, build, E2E e auditoria Lighthouse. A auditoria sobe a aplicação de preview na porta 4173, executa três medições mobile e desktop para início e NFT e produz `artifacts/lighthouse/summary.json`, além dos relatórios HTML/JSON. **Não considere metas atingidas antes de consultar os relatórios publicados no job.**
+
+Localmente, use:
+```bash
+npm ci
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4173
+# Em outro terminal:
+npm run lighthouse
+```
+
+## Cenários controlados de rede
+
+No Console do navegador, configure antes de recarregar:
+```js
+localStorage.setItem('kurio:mock-network-scenario:v1', JSON.stringify({ match: '/api/nfts', mode: 'http-error', status: 503 }))
+location.reload()
+```
+Modos: `slow`, `variable-latency`, `out-of-order`, `http-error`, `offline`, `timeout`. Para remover:
+```js
+localStorage.removeItem('kurio:mock-network-scenario:v1')
+location.reload()
+```
+A simulação é injetada por handlers MSW selecionados (catálogo, carrinho, cotação, sessão e consulta de pedidos). `out-of-order` usa a busca `nomad` como requisição lenta. O navegador pode manter dados em cache; limpe localStorage e atualize para restaurar o cenário.
 
 ## Desempenho
 
-As auditorias Lighthouse e seus resultados medidos ainda não foram executados; não há pontuações a reportar. Recomenda-se auditar build de produção, páginas início e detalhe em desktop/mobile, três execuções cada, e registrar medianas de Performance, Accessibility, Best Practices, SEO, LCP, CLS e TBT.
+As auditorias Lighthouse são executadas pelo workflow e pelo comando `npm run lighthouse`. Consulte os artefatos de CI: relatórios de execução e medianas não devem ser declarados aprovados até a execução. Recomenda-se auditar build de produção, páginas início e detalhe em desktop/mobile, três execuções cada, e registrar medianas de Performance, Accessibility, Best Practices, SEO, LCP, CLS e TBT.
 
 ## Decisões e limitações
 

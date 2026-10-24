@@ -51,3 +51,16 @@ Rotas privadas: `/profile`, `/wallets`, `/favorites`, `/checkout`, `/orders/:ord
 - Reset manual do cenário: DevTools > Application > Clear site data ou `localStorage.clear()` + `sessionStorage.clear()` + reload (apaga também conta e carrinho deste navegador).
 
 Cenários gerais determinísticos de falha de rede, latência variável, resposta fora de ordem, duplicidade de eventos e temporização controlada ainda precisam de um painel/fixture único antes de declarar cobertura completa.
+
+
+## Auditoria final e lacunas reconhecidas
+
+A pipeline `.github/workflows/delivery.yml` roda build/lint/Playwright e produz 12 auditorias Lighthouse (3x cada: Home/Detalhe x mobile/desktop). As métricas concretas ficam em artefatos de execução, não são presumidas. Os testes adicionais cobrem redes offline/HTTP 503, recuperação, conflito de cadastro, histórico de busca e acesso por teclado.
+
+### Falhas configuráveis
+
+`src/mocks/networkScenario.ts` lê `kurio:mock-network-scenario:v1` do localStorage e injeta `slow`, `variable-latency`, `out-of-order`, `http-error`, `offline`, `timeout` nos handlers REST selecionados. O comportamento não depende do React. A simulação Socket.IO continua limitada ao WebSocket, sem servidor Socket.IO integral. Testes automatizados de frames WebSocket, duplicatas, reconexão, expiração durante pedido e baselines visuais continuam necessários para cobertura total do enunciado.
+
+### Acessibilidade e Figma
+
+Perfil, carteiras, cadastro e login foram refinados nos PRs #9 e #12. Algumas ações ilustrativas foram omitidas por estarem fora do escopo (login social/recuperação real de senha, ENS real). A galeria reutiliza assets provisórios. Uma revisão visual humana foi realizada; ainda não há snapshots Playwright aprovados e versionados.

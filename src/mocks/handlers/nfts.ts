@@ -1,3 +1,4 @@
+import { simulateNetwork } from '../networkScenario'
 import { http, HttpResponse } from 'msw/http'
 import { ethToWei } from '@/features/nft/lib/price'
 import { nftFixtures } from '../fixtures/nfts'
@@ -7,7 +8,9 @@ import type { CatalogSort } from '@/features/nft/types/nft'
 const sortOptions = new Set<CatalogSort>(['recent', 'price_asc', 'price_desc', 'name_asc'])
 
 export const nftHandlers = [
-  http.get('/api/nfts', ({ request }) => {
+  http.get('/api/nfts', async ({ request }) => {
+    const injected = await simulateNetwork(request)
+    if (injected) return injected
     const url = new URL(request.url)
     const tab = url.searchParams.get('tab')
     const category = url.searchParams.get('category')

@@ -1,3 +1,4 @@
+import { simulateNetwork } from '../networkScenario'
 import { http, HttpResponse } from 'msw/http'
 import {
   changeAvatar, changeFavorite, changePassword, changeProfile, getFavorites,
@@ -34,7 +35,11 @@ export const authHandlers = [
     mergeGuestCart(result.user.id)
     return result
   })),
-  http.get('/api/auth/session', ({ request }) => handle(() => requireUser(request))),
+  http.get('/api/auth/session', async ({ request }) => {
+    const injected = await simulateNetwork(request)
+    if (injected) return injected
+    return handle(() => requireUser(request))
+  }),
   http.post('/api/auth/logout', ({ request }) => handle(() => { logoutAccount(request); return { message: 'Sessão encerrada.' } })),
   http.get('/api/profile', ({ request }) => handle(async () => (await requireUser(request)).user)),
   http.patch('/api/profile', ({ request }) => handle(async () => {

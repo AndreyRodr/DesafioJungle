@@ -1,9 +1,12 @@
+import { simulateNetwork } from '../networkScenario'
 import { http, HttpResponse } from 'msw/http'
 import type { CartResponse, CartQuote } from '@/features/cart/types/cart'
 import { cartScope } from '../state/auth'
 import { addLine, clearCoupon, deleteLine, getNftDetail, MockBusinessError, quoteCart, readCart, setCoupon, updateLine } from '../state/commerce'
 
 async function asResponse(request: Request, action: (scope: string) => CartResponse | CartQuote) {
+  const injected = await simulateNetwork(request)
+  if (injected) return injected
   try { const scope = await cartScope(request); return HttpResponse.json(action(scope)) }
   catch (error) {
     if (error instanceof MockBusinessError) return HttpResponse.json({ message: error.message }, { status: error.status })
