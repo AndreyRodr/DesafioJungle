@@ -161,3 +161,18 @@
 body {
   position: relative;
 }
+
+/* The same horizontal bounds on every route. CSS owns width instead of per-page Tailwind detection. */
+.kurio-page-shell {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 20px;
+  box-sizing: border-box;
+}
+@media (min-width: 1024px) {
+  .kurio-page-shell { padding-inline: 32px; }
+}
+@media (max-width: 1023px) {
+  .kurio-page-shell--bleed-mobile { padding-inline: 0; }
+}
