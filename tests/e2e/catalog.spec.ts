@@ -85,33 +85,48 @@ test('desktop Home and Mercado use the same 1280px content alignment', async ({ 
 
 test('desktop header logo, Entrar and content have the exact same x coordinates across routes', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes('mobile'), 'Desktop geometry only')
+
   async function geometry() {
-    return page.evaluate(() => {
-      const header = document.querySelector('header > div')
-      const main = document.querySelector('main')
-      const logo = document.querySelector('header a[href="/"]')
-      const login = [...document.querySelectorAll('header a')].find(a => a.textContent?.trim() === 'Entrar')
-      if (!header || !main || !logo || !login) throw new Error('Required navigation and page shell missing')
-      const h = header.getBoundingClientRect()
-      const m = main.getBoundingClientRect()
-      const l = logo.getBoundingClientRect()
-      const b = login.getBoundingClientRect()
-      return {
-        headerLeft: h.left,
-        headerRight: h.right,
-        mainLeft: m.left,
-        mainRight: m.right,
-        logoLeft: l.left,
-        loginRight: b.right,
-        maxWidth: getComputedStyle(header).maxWidth,
-        viewportWidth: window.innerWidth,
-      }
-    })
+    const header = page.locator('header > div').first()
+    const main = page.locator('main').first()
+    const logo = page.getByRole('banner').getByRole('link', { name: 'KURIO', exact: true })
+    const login = page.getByRole('banner').getByRole('link', { name: 'Entrar', exact: true })
+
+    // Navigating to the route is not sufficient: React only renders after MSW starts.
+    await expect(header).toBeVisible()
+    await expect(main).toBeVisible()
+    await expect(logo).toBeVisible()
+    await expect(login).toBeVisible()
+
+    const [h, m, l, b, maxWidth, viewportWidth] = await Promise.all([
+      header.boundingBox(),
+      main.boundingBox(),
+      logo.boundingBox(),
+      login.boundingBox(),
+      header.evaluate(element => getComputedStyle(element).maxWidth),
+      page.evaluate(() => window.innerWidth),
+    ])
+    expect(h).not.toBeNull()
+    expect(m).not.toBeNull()
+    expect(l).not.toBeNull()
+    expect(b).not.toBeNull()
+    return {
+      headerLeft: h!.x,
+      headerRight: h!.x + h!.width,
+      mainLeft: m!.x,
+      mainRight: m!.x + m!.width,
+      logoLeft: l!.x,
+      loginRight: b!.x + b!.width,
+      maxWidth,
+      viewportWidth,
+    }
   }
+
   await page.goto('/')
   const home = await geometry()
   await page.goto('/nft/emerald-ape-042')
   const market = await geometry()
+
   for (const key of ['headerLeft', 'headerRight', 'mainLeft', 'mainRight', 'logoLeft', 'loginRight'] as const) {
     expect(Math.abs(home[key] - market[key]), key).toBeLessThanOrEqual(1)
   }
