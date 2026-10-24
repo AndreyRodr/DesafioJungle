@@ -6,6 +6,12 @@ export interface CheckoutBuyer {
   displayName: string
   email: string
   notes?: string
+  username?: string
+  profileName?: string
+  walletType?: 'software' | 'hardware'
+  referralCode?: string
+  ensName?: string
+  secondaryWallet?: string
 }
 export interface OrderSnapshot {
   quote: CartQuote
