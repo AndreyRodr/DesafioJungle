@@ -17,8 +17,8 @@ export function Header() {
       <div className={`mx-auto grid h-16 grid-cols-[1fr_auto_1fr] items-center px-8 ${onHome ? "max-w-[1080px]" : "max-w-7xl"}`}>
         <Link to="/" className="w-fit font-mono text-sm font-bold tracking-widest">KURIO</Link>
         <nav aria-label="Navegação principal" className="flex h-full items-center gap-8 font-mono text-sm">
-          <Link to="/" className="flex h-full items-center border-b-2 border-[#d38d50] text-[#d38d50]">Início</Link>
-          <span className="text-[#f4ede5]">Mercado</span><span className="text-[#f4ede5]">Criadores</span><span className="text-[#f4ede5]">Aprenda</span>
+          <Link to="/" className={`flex h-full items-center border-b-2 ${onHome ? 'border-[#d38d50] text-[#d38d50]' : 'border-transparent text-[#f4ede5]'}`}>Início</Link>
+          <Link to="/" hash="catalog" aria-current={pathname.startsWith('/nft/') ? 'page' : undefined} className={`flex h-full items-center border-b-2 ${pathname.startsWith('/nft/') ? 'border-[#d38d50] text-[#d38d50]' : 'border-transparent text-[#f4ede5]'}`}>Mercado</Link><span className="text-[#f4ede5]">Criadores</span><span className="text-[#f4ede5]">Aprenda</span>
         </nav>
         <div className="flex items-center justify-end gap-5">
           <button type="button" disabled={!onHome} aria-label="Buscar NFTs" aria-controls="desktop-nft-search" aria-expanded={searchOpen && onHome} onClick={() => setSearchOpen((open) => !open)} className="text-[#f4ede5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d38d50] disabled:opacity-40"><Search size={19} aria-hidden="true" /></button>
