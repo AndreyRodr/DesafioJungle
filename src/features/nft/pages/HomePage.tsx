@@ -1,5 +1,6 @@
 import { useSearch, Link } from '@tanstack/react-router'
 import { Hero } from '../../../components/Hero'
+import { pageShellClass } from '@/components/layout/pageShell'
 import { HomeJournal, HomePromoBanners } from '../components/HomeEditorialSections'
 import { NFTCard } from '../components/NFTCard'
 import { NFTCardSkeleton } from '../components/NFTCardSkeleton'
@@ -29,7 +30,7 @@ export function HomePage() {
   return (
     <>
       <MobileHeader />
-      <main className="mx-auto w-full max-w-[1080px] px-4 pb-32 sm:px-6 lg:px-8 lg:pb-12">
+      <main className={`${pageShellClass} pb-32 lg:pb-12`}>
         <Hero />
         <section id="catalog" aria-labelledby="catalog-heading" aria-busy={isPending} className="scroll-mt-8 pt-6 lg:pt-10">
           <h2 id="catalog-heading" className="sr-only">Catálogo de NFTs</h2>
