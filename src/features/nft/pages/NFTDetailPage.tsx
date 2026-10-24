@@ -158,7 +158,7 @@ export function NFTDetailPage() {
   const { data, isPending, isError, error, refetch } = useNft(nftId)
   const notFound = isAxiosError(error) && error.response?.status === 404
   return (
-    <main className={`${pageShellBleedMobileClass} pb-60 pt-0 text-[#f4ede5] lg:pb-16 lg:pt-7`}>
+    <main className={`${pageShellBleedMobileClass} pb-40 pt-0 text-[#f4ede5] lg:pb-16 lg:pt-7`}>
       {isPending ? <div role="status" aria-label="Carregando NFT" className="grid gap-7 p-5 lg:grid-cols-2"><div className="nft-shimmer aspect-square rounded-3xl"/><div className="space-y-4"><div className="nft-shimmer h-10 w-3/4 rounded"/><div className="nft-shimmer h-5 w-full rounded"/><div className="nft-shimmer h-40 rounded-xl"/></div></div>
         : isError ? <div role="alert" className="m-5 rounded-xl border border-[#503328] bg-[#2a1914] p-8 font-mono"><h1 className="text-2xl">{notFound ? 'NFT não encontrado' : 'Falha ao carregar NFT'}</h1><p className="mt-3 text-sm text-[#b99872]">{notFound ? 'Este item não existe no catálogo.' : 'Não foi possível consultar o detalhe.'}</p>{!notFound && <button type="button" onClick={() => void refetch()} className="mt-5 text-[#d38d50] underline">Tentar novamente</button>}</div>
         : data ? <DetailContent key={data.id} nft={data}/> : null}
