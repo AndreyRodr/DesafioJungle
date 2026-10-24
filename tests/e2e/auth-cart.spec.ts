@@ -37,3 +37,22 @@ test('cart survives refresh and discount API accepts KURIO10', async ({ page }) 
   await page.getByRole('button', { name: /^aplicar$/i }).click()
   await expect(page.getByText('KURIO10 aplicado')).toBeVisible()
 })
+
+test('cart uses rectangular line items and offers collector recommendations', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('#catalog article a[href^="/nft/"]').first().click()
+  await page.getByRole('button', { name: /adicionar ao carrinho/i }).click()
+  await page.goto('/cart')
+
+  const items = page.getByRole('region', { name: 'Itens do carrinho' })
+  await expect(items.locator('article')).toHaveCount(1)
+  await expect(items.getByRole('button', { name: /aumentar quantidade/i })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Resumo do carrinho' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Colecionadores também viram' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Carrinho de NFTs' })).toBeAttached()
+
+  await items.getByRole('button', { name: /aumentar quantidade/i }).click()
+  await expect(items.locator('article')).toContainText('2')
+  await page.reload()
+  await expect(items.locator('article')).toHaveCount(1)
+})
