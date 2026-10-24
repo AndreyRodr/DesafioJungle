@@ -29,12 +29,12 @@ export function HomePage() {
   return (
     <>
       <MobileHeader />
-      <main className="mx-auto w-full max-w-7xl px-4 pb-32 sm:px-6 lg:px-8 lg:pb-12">
+      <main className="mx-auto w-full max-w-[1080px] px-4 pb-32 sm:px-6 lg:px-8 lg:pb-12">
         <Hero />
         <section id="catalog" aria-labelledby="catalog-heading" aria-busy={isPending} className="scroll-mt-8 pt-6 lg:pt-10">
           <h2 id="catalog-heading" className="sr-only">Catálogo de NFTs</h2>
           <div className="flex items-start gap-6 lg:gap-8">
-            <div className="hidden w-64 shrink-0 lg:block">
+            <div className="hidden w-[290px] shrink-0 lg:block">
               <CategorySidebar activeCategory={filters.category} />
               <FeaturedNftAside />
             </div>
@@ -45,7 +45,7 @@ export function HomePage() {
                 <div role="status" className="mt-5">
                   <span className="sr-only">Carregando NFTs...</span>
                   <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6">
-                    {Array.from({ length: 8 }, (_, index) => <NFTCardSkeleton key={index} />)}
+                    {Array.from({ length: 9 }, (_, index) => <NFTCardSkeleton key={index} />)}
                   </div>
                 </div>
               ) : isError && !data ? (
