@@ -1,4 +1,5 @@
 import { Link, useParams } from '@tanstack/react-router'
+import { pageShellClass } from '@/components/layout/pageShell'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { CheckCircle2, Clock3, XCircle } from 'lucide-react'
@@ -21,7 +22,7 @@ export function OrderPage() {
       void queryClient.invalidateQueries({ queryKey: ['cart-quote'] })
     }
   }, [order?.status, queryClient])
-  return <main className="mx-auto max-w-4xl px-5 pb-32 pt-10 font-mono text-[#f4ede5] lg:pb-16">
+  return <main className={`${pageShellClass} pb-32 pt-10 font-mono text-[#f4ede5] lg:pb-16`}>
     <Link to="/" className="text-sm text-[#d38d50]">← Voltar ao mercado</Link>
     {isPending ? <p role="status" className="mt-12">Consultando pedido...</p> : isError || !order ? <div role="alert" className="mt-12"><h1 className="text-2xl">Não foi possível recuperar o pedido.</h1><button onClick={() => void refetch()} className="mt-4 text-[#d38d50] underline">Tentar novamente</button></div> :
       <div className="mx-auto mt-12 max-w-2xl border border-[#503328] bg-[#251711] p-6 sm:p-10">
