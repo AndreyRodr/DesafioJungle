@@ -10,27 +10,12 @@ export function useCartQuote() {
   const { user, token } = useAuth()
   return useQuery({ queryKey: ['cart-quote', token ? (user?.id ?? token) : 'guest'], queryFn: ({ signal }) => getCartQuote(signal) })
 }
-import { addToCart, applyCoupon, changeCartQuantity, getCart, getCartQuote, removeCartItem, removeCoupon } from '../api/cart'
-
-export const cartQueryKey = ['cart', 'guest'] as const
-export const quoteQueryKey = ['cart-quote', 'guest'] as const
-
-export function useCart() {
-  return useQuery({ queryKey: cartQueryKey, queryFn: ({ signal }) => getCart(signal) })
-}
-
-export function useCartQuote() {
-  return useQuery({ queryKey: quoteQueryKey, queryFn: ({ signal }) => getCartQuote(signal) })
-}
-
 export function useCartActions() {
   const queryClient = useQueryClient()
   const invalidate = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['cart'] }),
       queryClient.invalidateQueries({ queryKey: ['cart-quote'] }),
-      queryClient.invalidateQueries({ queryKey: cartQueryKey }),
-      queryClient.invalidateQueries({ queryKey: quoteQueryKey }),
     ])
   }
   return {

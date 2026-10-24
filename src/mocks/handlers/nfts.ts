@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw/http'
 import { ethToWei } from '@/features/nft/lib/price'
 import { nftFixtures } from '../fixtures/nfts'
+import { inventoryState } from '../state/commerce'
 import type { CatalogSort } from '@/features/nft/types/nft'
 
 const sortOptions = new Set<CatalogSort>(['recent', 'price_asc', 'price_desc', 'name_asc'])
@@ -30,7 +31,7 @@ export const nftHandlers = [
       return HttpResponse.json({ message: 'O preço mínimo supera o máximo' }, { status: 400 })
     }
 
-    const filtered = nftFixtures.filter((nft) => {
+    const filtered = nftFixtures.map((nft) => ({ ...nft, priceEth: inventoryState(nft.id).priceEth ?? nft.priceEth })).filter((nft) => {
       const matchesTab = tab === 'new' ? nft.isNew === true
         : tab === 'trending' ? nft.isTrending === true : true
       const price = ethToWei(nft.priceEth)

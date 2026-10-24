@@ -169,3 +169,10 @@ export async function changeFavorite(request: Request, nftId: string, active: bo
   save(USERS_KEY, current.map((item) => item.id === user.id ? { ...item, favorites } : item))
   return favorites
 }
+
+/** Usado apenas no gateway MSW para isolar notificações por sessão. */
+export function socketUserForToken(token: string | null): string | null {
+  if (!token) return null
+  const session = sessions().find((item) => item.token === token && item.expiresAt > Date.now())
+  return session?.userId ?? null
+}

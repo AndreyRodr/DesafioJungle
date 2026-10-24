@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { AuthLayout, actionClass, fieldClass } from '../components/AuthLayout'
 import { apiErrorMessage } from '../lib/errors'
 import { safeReturnPath } from '../lib/session'
@@ -7,16 +7,29 @@ import { useAuthActions } from '../hooks/useAuth'
 
 export function LoginPage() {
   const { redirect } = useSearch({ from: '/login' })
+  const navigate = useNavigate()
   const { login } = useAuthActions()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+
   async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setError(''); setBusy(true)
-    try { await login(email, password); window.location.assign(safeReturnPath(redirect)) }
-    catch (cause) { setError(apiErrorMessage(cause)); setBusy(false) }
+    event.preventDefault()
+    setError('')
+    setBusy(true)
+    try {
+      await login(email, password)
+      const destination = safeReturnPath(redirect)
+      if (destination === '/') await navigate({ to: '/' })
+      else window.location.assign(destination)
+    } catch (cause) {
+      setError(apiErrorMessage(cause))
+    } finally {
+      setBusy(false)
+    }
   }
+
   return <AuthLayout title="Entrar na Kurio" description="Continue sua coleção digital.">
     <form onSubmit={(event) => void submit(event)} className="space-y-5">
       <div><label htmlFor="login-email" className="text-sm">E-mail</label><input id="login-email" className={fieldClass} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>

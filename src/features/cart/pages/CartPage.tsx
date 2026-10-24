@@ -73,8 +73,8 @@ function Summary() {
   }
 
   return (
-    <aside className="rounded-xl border border-[#503328] bg-[#251711] p-5 font-mono lg:sticky lg:top-6" aria-label="Resumo do carrinho">
-      <h2 className="text-lg font-bold text-[#f4ede5]">Resumo do pedido</h2>
+    <aside className="bg-[#251711] p-5 font-mono lg:sticky lg:top-6" aria-label="Resumo do carrinho">
+      <h2 className="text-lg font-bold text-[#f4ede5]">Resumo da carteira</h2>
       {isPending ? <div role="status" className="mt-6 space-y-3"><span className="sr-only">Carregando valores</span><div className="nft-shimmer h-5 rounded"/><div className="nft-shimmer h-5 rounded"/><div className="nft-shimmer h-5 rounded"/></div> : isError ? <div role="alert" className="mt-5 text-sm text-red-300">Não foi possível calcular a cotação. <button type="button" onClick={() => void refetch()} className="underline">Tentar novamente</button></div> : quote ? <>
         <dl className="mt-6 space-y-4 text-sm">
           <div className="flex justify-between gap-4"><dt className="text-[#b99872]">Subtotal</dt><dd>{quote.subtotalEth} ETH</dd></div>
@@ -92,8 +92,8 @@ function Summary() {
         {error && <p role="alert" className="mt-2 text-xs text-red-300">{error}</p>}
         <p className="mt-3 text-xs text-[#b99872]">Cupom de demonstração: KURIO10</p>
       </div>
-      <button type="button" disabled title="O checkout será habilitado no próximo bloco" className="mt-6 w-full rounded-lg bg-[#d38d50] px-5 py-4 text-sm font-bold text-[#160e0b] disabled:cursor-not-allowed disabled:opacity-60">Continuar para pagamento</button>
-      <p className="mt-2 text-center text-xs text-[#b99872]">Checkout disponível após integrar autenticação e pedidos.</p>
+      {quote?.valid ? <Link to="/checkout" className="mt-6 block w-full rounded-lg bg-[#d38d50] px-5 py-4 text-center text-sm font-bold text-[#160e0b] hover:bg-[#eda667]">Conectar e finalizar</Link> : <button type="button" disabled className="mt-6 w-full rounded-lg bg-[#d38d50] px-5 py-4 text-sm font-bold text-[#160e0b] opacity-50">Carrinho indisponível para pagamento</button>}
+      <p className="mt-2 text-center text-xs text-[#b99872]">Pagamento simulado · login necessário</p>
     </aside>
   )
 }
@@ -103,7 +103,7 @@ export function CartPage() {
   return (
     <main className="mx-auto max-w-7xl px-5 pb-32 pt-8 text-[#f4ede5] lg:px-8 lg:pb-16">
       <Link to="/" className="mb-7 inline-flex items-center gap-2 font-mono text-sm text-[#d38d50]"><ArrowLeft size={18}/> Continuar explorando</Link>
-      <h1 className="mb-7 font-mono text-3xl font-bold">Carrinho de NFTs</h1>
+      <h1 className="mb-7 font-mono text-3xl font-bold lg:sr-only">Carrinho de NFTs</h1>
       {isPending ? <div role="status" className="nft-shimmer h-48 rounded-2xl"><span className="sr-only">Carregando carrinho</span></div> : isError ? <div role="alert" className="rounded-xl bg-[#251711] p-6">Não foi possível carregar o carrinho. <button type="button" onClick={() => void refetch()} className="text-[#d38d50] underline">Tentar novamente</button></div> : !data?.items.length ? <div className="rounded-2xl border border-[#503328] bg-[#251711] p-10 text-center font-mono"><ShoppingBag size={44} className="mx-auto text-[#d38d50]"/><p className="mt-5">Seu carrinho está vazio.</p><Link to="/" className="mt-5 inline-block rounded-lg bg-[#d38d50] px-5 py-3 font-bold text-[#160e0b]">Explorar NFTs</Link></div> : <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">{data.items.map((item) => <ItemRow key={item.key} item={item} />)}</div>
         <Summary />

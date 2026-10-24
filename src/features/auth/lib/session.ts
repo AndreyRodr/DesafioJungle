@@ -16,6 +16,6 @@ export function subscribeAuth(callback: () => void): () => void {
 }
 export function safeReturnPath(value?: string): string {
   if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '/'
-  const allowed = ['/cart', '/profile', '/wallets', '/favorites', '/checkout', '/nft/']
+  const allowed = ['/cart', '/profile', '/wallets', '/favorites', '/checkout', '/orders/', '/nft/']
   return allowed.some((prefix) => value === prefix || (prefix.endsWith('/') && value.startsWith(prefix))) ? value : '/'
 }

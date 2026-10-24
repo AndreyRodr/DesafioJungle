@@ -1,6 +1,13 @@
 import { nftHandlers } from './handlers/nfts'
 import { commerceHandlers } from './handlers/commerce'
 import { authHandlers } from './handlers/auth'
-export const handlers = [...nftHandlers, ...commerceHandlers, ...authHandlers]
+import { orderHandlers } from './handlers/orders'
+import { realtimeHandlers } from './handlers/realtime'
 
-export const handlers = [...nftHandlers, ...commerceHandlers]
+export const handlers = [
+  ...nftHandlers,
+  ...commerceHandlers,
+  ...authHandlers,
+  ...orderHandlers,
+  ...realtimeHandlers,
+]
