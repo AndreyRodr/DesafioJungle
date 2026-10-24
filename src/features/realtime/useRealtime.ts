@@ -10,7 +10,8 @@ export function useRealtime() {
   const queryClient = useQueryClient()
   const userId = user?.id
   useEffect(() => {
-    if (!token || !userId) return
+    // Public NFT updates must also reach visitors with an anonymous cart.
+    // The mock socket gateway accepts anonymous connections but never sends private orders.
     const latestVersion = new Map<string, number>()
     const seenEvents = new Set<string>()
     const socket = io(window.location.origin, {

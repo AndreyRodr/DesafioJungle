@@ -1,3 +1,4 @@
+import { simulateNetwork } from '../networkScenario'
 import { http, HttpResponse } from 'msw/http'
 import { requireUser } from '../state/auth'
 import { createOrder, orderById, orderByKey } from '../state/orders'
@@ -25,10 +26,14 @@ export const orderHandlers = [
     const { user } = await requireUser(request)
     return orderByKey(String(params.key), user.id)
   })),
-  http.get('/api/orders/:id', ({ request, params }) => respond(async () => {
-    const { user } = await requireUser(request)
-    return orderById(String(params.id), user.id)
-  })),
+  http.get('/api/orders/:id', async ({ request, params }) => {
+    const injected = await simulateNetwork(request)
+    if (injected) return injected
+    return respond(async () => {
+      const { user } = await requireUser(request)
+      return orderById(String(params.id), user.id)
+    })
+  }),
   // Painel de cenários para desenvolvimento e testes: nunca disponível no backend real.
   http.patch('/api/mock/nfts/:id', async ({ request, params }) => respond(async () => {
     const { user } = await requireUser(request)
