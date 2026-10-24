@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { pageShellClass } from '@/components/layout/pageShell'
 import { CartRecommendations } from '../components/CartRecommendations'
 import { Link } from '@tanstack/react-router'
@@ -31,30 +31,49 @@ function ItemRow({ item }: { item: CartItem }) {
   }
 
   return (
-    <article className="rounded-sm bg-[#251711] px-3 py-3 font-mono sm:px-4" aria-label={item.name}>
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 lg:grid-cols-[minmax(0,1.55fr)_minmax(88px,0.65fr)_minmax(102px,0.8fr)_minmax(90px,0.8fr)_28px] lg:gap-3">
+    <article className="overflow-hidden rounded-[22px] bg-[#251711] font-mono lg:rounded-sm lg:px-3 lg:py-3" aria-label={item.name}>
+      {/* Figma mobile card: artwork at left, edition and quantity beside the title. */}
+      <div className="grid min-h-[122px] grid-cols-[112px_minmax(0,1fr)] items-stretch gap-3 lg:hidden">
+        <Link to="/nft/$nftId" params={{ nftId: item.nftId }} className="block overflow-hidden rounded-[20px]">
+          <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+        </Link>
+        <div className="flex min-w-0 flex-col justify-between py-3 pr-3">
+          <div className="flex min-w-0 items-start gap-1">
+            <Link to="/nft/$nftId" params={{ nftId: item.nftId }} className="min-w-0 flex-1 text-sm font-bold leading-5 text-[#f4ede5] hover:text-[#d38d50]">{item.name}</Link>
+            <button type="button" disabled={busy} onClick={() => void deleteItem()} aria-label={`Remover ${item.name}`} className="shrink-0 p-1 text-[#b99872] disabled:opacity-40"><Trash2 size={16} /></button>
+          </div>
+          <div className="flex items-center justify-between gap-1">
+            <span className="truncate text-xs text-[#b99872]">{item.editionLabel}</span>
+            <div className="flex shrink-0 items-center gap-2">
+              <button type="button" disabled={busy || item.quantity <= 1} onClick={() => void updateQuantity(item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full border border-[#503328] text-[#f4ede5] disabled:opacity-40"><Minus size={16} /></button>
+              <span className="min-w-4 text-center text-sm" aria-live="polite">{item.quantity}</span>
+              <button type="button" disabled={busy || item.quantity >= item.available} onClick={() => void updateQuantity(item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full border border-[#503328] text-[#f4ede5] disabled:opacity-40"><Plus size={16} /></button>
+            </div>
+          </div>
+          <strong className="text-lg text-[#d38d50]">{weiToEth(multiplyEth(item.unitPriceEth, item.quantity))} ETH</strong>
+        </div>
+      </div>
+      {/* Preserve the approved desktop table row. */}
+      <div className="hidden items-center gap-3 lg:grid lg:grid-cols-[minmax(0,1.55fr)_minmax(88px,0.65fr)_minmax(102px,0.8fr)_minmax(90px,0.8fr)_28px]">
         <div className="flex min-w-0 items-center gap-3">
-          <Link to="/nft/$nftId" params={{ nftId: item.nftId }} className="w-16 shrink-0 overflow-hidden rounded-sm sm:w-[72px]">
+          <Link to="/nft/$nftId" params={{ nftId: item.nftId }} className="w-[72px] shrink-0 overflow-hidden rounded-sm">
             <img src={item.imageUrl} alt={item.name} className="aspect-square w-full object-cover" loading="lazy" />
           </Link>
           <div className="min-w-0">
-            <Link to="/nft/$nftId" params={{ nftId: item.nftId }} className="block truncate text-xs font-bold text-[#f4ede5] hover:text-[#d38d50] sm:text-sm">{item.name}</Link>
+            <Link to="/nft/$nftId" params={{ nftId: item.nftId }} className="block truncate text-sm font-bold text-[#f4ede5] hover:text-[#d38d50]">{item.name}</Link>
             <p className="mt-1 truncate text-[11px] text-[#b99872]">{item.editionLabel}</p>
           </div>
         </div>
-        <button type="button" disabled={busy} onClick={() => void deleteItem()} aria-label={`Remover ${item.name}`} className="rounded p-1 text-[#b99872] hover:text-red-300 disabled:opacity-40 lg:order-last"><Trash2 size={18}/></button>
-        <div className="hidden whitespace-nowrap text-xs font-bold text-[#d38d50] lg:block">{item.unitPriceEth} ETH</div>
-        <div className="col-span-2 flex items-center justify-between gap-3 border-t border-[#503328]/50 pt-3 lg:col-span-1 lg:border-0 lg:pt-0">
-          <span className="text-xs text-[#b99872] lg:hidden">{item.unitPriceEth} ETH</span>
-          <div className="flex items-center gap-2">
-            <button type="button" disabled={busy || item.quantity <= 1} onClick={() => void updateQuantity(item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d38d50] text-[#160e0b] disabled:opacity-40"><Minus size={14}/></button>
-            <span className="min-w-4 text-center text-sm text-[#f4ede5]" aria-live="polite">{item.quantity}</span>
-            <button type="button" disabled={busy || item.quantity >= item.available} onClick={() => void updateQuantity(item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d38d50] text-[#160e0b] disabled:opacity-40"><Plus size={14}/></button>
-          </div>
+        <div className="whitespace-nowrap text-xs font-bold text-[#d38d50]">{item.unitPriceEth} ETH</div>
+        <div className="flex items-center gap-2">
+          <button type="button" disabled={busy || item.quantity <= 1} onClick={() => void updateQuantity(item.quantity - 1)} aria-label={`Diminuir quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d38d50] text-[#160e0b] disabled:opacity-40"><Minus size={14}/></button>
+          <span className="min-w-4 text-center text-sm" aria-live="polite">{item.quantity}</span>
+          <button type="button" disabled={busy || item.quantity >= item.available} onClick={() => void updateQuantity(item.quantity + 1)} aria-label={`Aumentar quantidade de ${item.name}`} className="flex h-7 w-7 items-center justify-center rounded-full bg-[#d38d50] text-[#160e0b] disabled:opacity-40"><Plus size={14}/></button>
         </div>
-        <div className="col-span-2 text-right text-sm font-bold text-[#d38d50] lg:col-span-1 lg:text-left">{weiToEth(multiplyEth(item.unitPriceEth, item.quantity))} ETH</div>
+        <div className="text-sm font-bold text-[#d38d50]">{weiToEth(multiplyEth(item.unitPriceEth, item.quantity))} ETH</div>
+        <button type="button" disabled={busy} onClick={() => void deleteItem()} aria-label={`Remover ${item.name}`} className="rounded p-1 text-[#b99872] hover:text-red-300 disabled:opacity-40"><Trash2 size={18}/></button>
       </div>
-      {message && <p role="alert" className="mt-2 text-xs text-red-300">{message}</p>}
+      {message && <p role="alert" className="px-3 pb-2 text-xs text-red-300 lg:px-0">{message}</p>}
     </article>
   )
 }
