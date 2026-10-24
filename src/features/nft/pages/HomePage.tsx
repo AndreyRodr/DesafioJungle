@@ -5,6 +5,7 @@ import { NFTCard } from '../components/NFTCard'
 import { NFTCardSkeleton } from '../components/NFTCardSkeleton'
 import { CatalogTabs } from '../components/CatalogTabs'
 import { CategorySidebar } from '../components/CategorySidebar'
+import { FeaturedNftAside } from '../components/FeaturedNftAside'
 import { CatalogToolbar } from '../components/CatalogToolbar'
 import { CatalogPagination } from '../components/CatalogPagination'
 import { MobileHeader } from '@/components/layout/MobileHeader'
@@ -32,8 +33,11 @@ export function HomePage() {
         <Hero />
         <section id="catalog" aria-labelledby="catalog-heading" aria-busy={isPending} className="scroll-mt-8 pt-6 lg:pt-10">
           <h2 id="catalog-heading" className="sr-only">Catálogo de NFTs</h2>
-          <div className="flex items-start gap-6">
-            <CategorySidebar activeCategory={filters.category} />
+          <div className="flex items-start gap-6 lg:gap-8">
+            <div className="hidden w-64 shrink-0 lg:block">
+              <CategorySidebar activeCategory={filters.category} />
+              <FeaturedNftAside />
+            </div>
             <div className="min-w-0 flex-1">
               <div className="mb-5"><CatalogTabs activeTab={filters.tab} /></div>
               <CatalogToolbar />
