@@ -84,3 +84,22 @@ test('mobile checkout has a fixed buy button and wallet provider choices', async
   expect(before.position).toBe('fixed')
   expect(Math.abs(before.viewport - before.bottom)).toBeLessThanOrEqual(1)
 })
+
+test('network choices are interactive and require a matching registered wallet', async ({ page }) => {
+  await page.goto('/checkout')
+  const network = page.getByLabel('Rede', { exact: false }).first()
+  await expect(network).toBeEnabled()
+  await network.selectOption('polygon')
+  await expect(page.getByText(/você não possui carteira cadastrada para essa rede/i)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Cadastrar carteira' }).first()).toBeVisible()
+})
+
+test('ENS extension is selectable and its combined value is retained in the input', async ({ page }) => {
+  await page.goto('/checkout')
+  const ens = page.getByLabel('Nome ENS (opcional)')
+  const suffix = page.getByLabel('Extensão ENS ou domínio')
+  await ens.fill('kurio')
+  await suffix.selectOption('.xyz')
+  await expect(suffix).toHaveValue('.xyz')
+  await expect(ens).toHaveValue('kurio')
+})
