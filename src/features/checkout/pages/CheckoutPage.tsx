@@ -112,7 +112,7 @@ export function CheckoutPage() {
       <Link to="/cart" aria-label="Voltar ao carrinho" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-[#503328] bg-[#302018] text-[#b99872] focus-visible:outline-2 focus-visible:outline-[#d38d50]"><ArrowLeft size={22} aria-hidden="true"/></Link>
       <h1 className="text-lg font-bold leading-tight sm:text-2xl">Pagamento com carteira</h1>
     </div>
-    <form onSubmit={(event) => void submit(event)} className="mt-8 grid gap-9 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-12">
+    <form id="kurio-checkout-form" onSubmit={(event) => void submit(event)} className="mt-8 grid gap-9 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-12">
       <section aria-label="Carteiras no mobile" className="space-y-8 lg:hidden">
         <div>
           <div className="mb-4 flex items-center justify-between gap-3">
@@ -202,11 +202,13 @@ export function CheckoutPage() {
         {quoteChanged && quote?.valid && <button type="button" onClick={() => void reviewQuote()} disabled={busy} className="w-full rounded-full border border-[#d38d50] px-5 py-3 text-sm font-bold text-[#d38d50] disabled:opacity-50">Revisar valores atualizados</button>}
         <p className="text-center text-xs text-[#b99872]">Pagamento simulado. Nenhuma transação real será enviada.</p>
       </section>
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[#302018] bg-[#160e0b] px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:hidden">
-        <button type="submit" disabled={!ready || busy} className="mx-auto block min-h-16 w-full max-w-xl rounded-full bg-[#d38d50] px-5 py-4 text-base font-bold text-[#160e0b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4ede5] disabled:opacity-40">
-          {busy ? 'Processando...' : 'Confirmar compra'}
-        </button>
-      </div>
     </form>
+    {/* Fora do grid do formulário: o resumo não pode interceptar o botão fixo.
+        O atributo form preserva a submissão e validação nativas do navegador. */}
+    <div className="fixed inset-x-0 bottom-0 z-[100] border-t border-[#302018] bg-[#160e0b] px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:hidden">
+      <button type="submit" form="kurio-checkout-form" disabled={!ready || busy} className="mx-auto block min-h-16 w-full max-w-xl rounded-full bg-[#d38d50] px-5 py-4 text-base font-bold text-[#160e0b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4ede5] disabled:opacity-40">
+        {busy ? 'Processando...' : 'Confirmar compra'}
+      </button>
+    </div>
   </main>
 }
