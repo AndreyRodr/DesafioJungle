@@ -9,9 +9,10 @@ export function RootLayout() {
   useRealtime()
   const path = useRouterState({ select: (state) => state.location.pathname })
   const authScreen = path === '/login' || path === '/register'
+  const isNftDetail = path.startsWith('/nft/')
   const hideBottomNav = authScreen || path === '/checkout' || path.startsWith('/orders/') || path === '/cart' || path.startsWith('/nft/')
   return (
-    <div className="min-h-screen bg-[#160e0b] pb-28 text-[#f4ede5] lg:pb-0">
+    <div className={`min-h-screen text-[#f4ede5] lg:bg-[#160e0b] lg:pb-0 ${isNftDetail ? "bg-[#251711] pb-0" : "bg-[#160e0b] pb-28"}`}>
       <Header />
       <Outlet />
       <Footer />
