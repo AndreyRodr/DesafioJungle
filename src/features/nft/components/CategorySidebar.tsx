@@ -1,6 +1,5 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
-import nft1 from '@/assets/nft1.png'
 import { nftCategories, type NFTCategory } from '../constants/categories'
 
 interface CategorySidebarProps { activeCategory?: NFTCategory }
@@ -12,7 +11,7 @@ export function CategorySidebar({ activeCategory }: CategorySidebarProps) {
   const [max, setMax] = useState(search.maxPrice ?? '')
   const base = 'block rounded-sm py-2 text-sm transition-colors hover:text-[#d38d50] focus-visible:outline-2 focus-visible:outline-[#d38d50]'
   return (
-    <aside className="hidden w-64 shrink-0 self-start bg-[#251711] p-5 font-mono lg:block">
+    <aside className="w-full bg-[#251711] p-5 font-mono">
       <h3 className="mb-3 font-bold text-[#f4ede5]">Coleções</h3>
       <nav aria-label="Categorias de NFTs" className="space-y-1">
         <Link to="/" search={(previous) => ({ ...previous, category: undefined, page: undefined })}
@@ -44,10 +43,7 @@ export function CategorySidebar({ activeCategory }: CategorySidebarProps) {
           <option value="all">Todas as redes</option><option value="ethereum">Ethereum</option><option value="polygon">Polygon</option><option value="base">Base</option>
         </select>
       </section>
-      <section className="mt-8 overflow-hidden rounded-lg bg-[#392319]">
-        <img src={nft1} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
-        <div className="p-4"><h3 className="text-sm font-bold text-[#f4ede5]">NFT em destaque</h3><p className="mt-2 text-xs leading-5 text-[#b99872]">Descubra novas edições digitais.</p><Link to="/nft/$nftId" params={{ nftId: 'emerald-ape-042' }} className="mt-4 inline-block rounded bg-[#d38d50] px-3 py-2 text-xs font-bold text-[#160e0b]">Ver NFT</Link></div>
-      </section>
+
     </aside>
   )
 }
