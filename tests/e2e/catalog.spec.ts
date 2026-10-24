@@ -45,3 +45,20 @@ test('catalog has nine items per page and right-aligned numbered navigation', as
   await expect(cards).toHaveCount(5)
   await expect(pagination.getByRole('link', { name: 'Próxima página' })).toHaveCount(0)
 })
+
+test('NFT detail keeps edition, quantity and cart interactions on desktop and mobile', async ({ page }) => {
+  await page.goto('/nft/emerald-ape-042')
+  await expect(page.getByRole('heading', { name: 'Emerald Ape #042' })).toBeVisible()
+  await expect(page.getByText('Coleção: Kurio Apes')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Aumentar quantidade' })).toBeVisible()
+  await page.getByRole('button', { name: 'Aumentar quantidade' }).click()
+  await expect(page.getByRole('spinbutton', { name: 'Quantidade' })).toHaveValue('2')
+  await page.getByRole('button', { name: 'Diminuir quantidade' }).click()
+  await expect(page.getByRole('spinbutton', { name: 'Quantidade' })).toHaveValue('1')
+  await expect(page.getByRole('button', { name: 'Comprar agora' })).toBeVisible()
+  if (page.viewportSize()?.width && page.viewportSize()!.width >= 1024) {
+    await expect(page.getByRole('heading', { name: 'Mais desta coleção' })).toBeVisible()
+    await page.getByRole('button', { name: 'Ver imagem 2' }).click()
+    await expect(page.getByRole('button', { name: 'Ver imagem 2' })).toHaveAttribute('aria-pressed', 'true')
+  }
+})
