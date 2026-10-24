@@ -38,7 +38,25 @@ test('wallet can be registered; order is confirmed and receipt survives refresh'
   await page.getByLabel(/nome de exibição/i).fill('Colecionador Teste')
   await page.getByLabel(/e-mail/i).fill('collector@kurio.test')
   await page.getByRole('button', { name: /revisar valores atualizados/i }).click()
-  await page.getByRole('button', { name: /confirmar compra/i }).click()
+  const confirm = page.getByRole('button', { name: 'Confirmar compra', exact: true })
+  await expect(confirm).toBeEnabled()
+
+  if (test.info().project.name.includes('mobile')) {
+    // Regressão: o botão pode estar visível e habilitado, mas coberto por outro
+    // elemento ou impedido de enviar o formulário por validação HTML nativa.
+    const invalidFields = await page.locator('#kurio-checkout-form :invalid')
+      .evaluateAll(elements => elements.map(element => element.outerHTML.slice(0, 180)))
+    expect(invalidFields, 'O formulário contém campos inválidos e bloqueará o submit').toEqual([])
+
+    const buttonCanReceiveClick = await confirm.evaluate(button => {
+      const rect = button.getBoundingClientRect()
+      const point = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      return point === button || button.contains(point)
+    })
+    expect(buttonCanReceiveClick, 'Outro elemento está interceptando o clique no CTA mobile').toBe(true)
+  }
+
+  await confirm.click()
   await expect(page).toHaveURL(/\/orders\//)
   await expect(page.getByRole('heading', { name: /pedido confirmado/i })).toBeVisible({ timeout: 15000 })
   await page.reload()
