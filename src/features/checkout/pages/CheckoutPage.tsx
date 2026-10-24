@@ -3,7 +3,8 @@ import { pageShellClass } from '@/components/layout/pageShell'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { ArrowLeft, WalletCards } from 'lucide-react'
+import { WalletCards } from 'lucide-react'
+import { multiplyEth, weiToEth } from '@/features/cart/lib/money'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { listWallets } from '@/features/auth/api/auth'
 import type { Wallet } from '@/features/auth/types/auth'
@@ -91,30 +92,30 @@ export function CheckoutPage() {
 
   const updateBuyer = (fieldName: keyof CheckoutBuyer, value: string) => setBuyer((prev) => ({ ...prev, [fieldName]: value }))
   return <main className={`${pageShellClass} pb-32 pt-6 font-mono text-[#f4ede5] lg:pb-16`}>
-    <Link to="/cart" className="inline-flex items-center gap-2 text-sm text-[#d38d50]"><ArrowLeft size={17}/> Voltar ao carrinho</Link>
-    <h1 className="mt-5 text-2xl font-bold lg:text-3xl">Pagamento com carteira</h1>
-    <form onSubmit={(event) => void submit(event)} className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-      <section aria-label="Dados do colecionador" className="space-y-6">
-        <h2 className="text-lg font-bold">Perfil do colecionador</h2>
-        <div className="grid gap-5 sm:grid-cols-2">
+    <nav aria-label="Caminho do pagamento" className="mb-6 text-xs font-bold text-[#f4ede5]"><Link to="/" className="hover:text-[#d38d50]">Início</Link> / <Link to="/" hash="catalog" className="hover:text-[#d38d50]">Mercado</Link> / Pagamento</nav>
+    <h1 className="sr-only">Pagamento com carteira</h1>
+    <form onSubmit={(event) => void submit(event)} className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,0.9fr)] lg:gap-8">
+      <section aria-label="Dados do colecionador" className="space-y-5">
+        <h2 className="text-base font-bold">Perfil do colecionador</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">Nome de exibição *<input required minLength={2} maxLength={80} className={field} value={buyer.displayName} onChange={e => updateBuyer('displayName', e.target.value)} autoComplete="name" /></label>
           <label className="text-sm">Nome de usuário<input className={field} value={user?.name ?? ''} readOnly /></label>
           <label className="text-sm">E-mail *<input required type="email" className={field} value={buyer.email} onChange={e => updateBuyer('email', e.target.value)} autoComplete="email" /></label>
           <label className="text-sm">Rede selecionada<input readOnly className={field} value={selectedWallet?.network ?? 'Cadastre uma carteira'} /></label>
         </div>
-        <h2 className="pt-2 text-lg font-bold">Carteira conectada</h2>
+        <h2 className="pt-2 text-base font-bold">Carteira conectada</h2>
         {walletsQuery.isPending ? <div className="nft-shimmer h-28 rounded" role="status" aria-label="Carregando carteiras"/> : walletsQuery.isError ? <p role="alert">Falha ao carregar carteiras. <button type="button" onClick={() => void walletsQuery.refetch()} className="underline">Tentar novamente</button></p> : wallets.length === 0 ? <p className="rounded-lg border border-[#503328] bg-[#251711] p-5 text-sm">Nenhuma carteira cadastrada. <Link to="/wallets" className="text-[#d38d50] underline">Cadastrar carteira</Link></p> : <fieldset className="space-y-3"><legend className="sr-only">Selecionar carteira</legend>{wallets.map((w: Wallet) => <label key={w.slot} className={`flex cursor-pointer items-center gap-4 rounded-xl border p-4 ${selectedWallet?.slot === w.slot ? 'border-[#d38d50]' : 'border-[#503328]'} bg-[#251711]`}><input type="radio" name="wallet" checked={selectedWallet?.slot === w.slot} onChange={() => { setSlot(w.slot); setReviewedSignature(null) }} className="accent-[#d38d50]"/><WalletCards size={24} className="text-[#d38d50]"/><span className="min-w-0"><strong className="block">{w.label}</strong><span className="block truncate text-xs text-[#b99872]">{w.address} · {w.network}</span></span></label>)}</fieldset>}
         <div><Link to="/wallets" className="text-sm text-[#d38d50] underline">Trocar ou cadastrar carteira</Link></div>
         <label className="block text-sm">Observações do colecionador (opcional)<textarea className={`${field} min-h-24 resize-y`} maxLength={500} value={buyer.notes ?? ''} onChange={e => updateBuyer('notes', e.target.value)}/></label>
       </section>
-      <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start" aria-label="Resumo do pagamento">
-        <section><h2 className="border-b border-[#503328] pb-3 text-lg font-bold">Seus NFTs</h2>{loadingQuote ? <div role="status" className="nft-shimmer mt-4 h-44 rounded" aria-label="Carregando resumo"/> : quoteError ? <button type="button" onClick={() => void refetchQuote()} className="mt-4 text-red-300 underline">Falha ao buscar cotação. Tentar novamente</button> : !quote?.items.length ? <p className="mt-5 text-sm">Seu carrinho está vazio. <Link to="/" className="text-[#d38d50] underline">Explorar</Link></p> : <div className="mt-3 space-y-2">{quote.items.map(item => <div key={item.key} className="flex items-center gap-3 bg-[#251711] p-2"><img src={item.imageUrl} alt="" className="h-16 w-16 shrink-0 rounded object-cover"/><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{item.name}</p><p className="text-xs text-[#b99872]">{item.editionLabel} × {item.quantity}</p></div><span className="shrink-0 text-sm font-bold text-[#d38d50]">{item.unitPriceEth} ETH</span></div>)}</div>}</section>
-        {quote && <section className="space-y-3 text-sm"><div className="flex justify-between gap-2"><span>Subtotal</span><span>{quote.subtotalEth} ETH</span></div><div className="flex justify-between gap-2"><span>Desconto</span><span>− {quote.discountEth} ETH</span></div><div className="flex justify-between gap-2"><span>Taxa da rede</span><span>{quote.networkFeeEth} ETH</span></div><div className="flex justify-between gap-2 border-t border-[#503328] pt-4 text-lg font-bold"><span>Total</span><span className="text-[#d38d50]">{quote.totalEth} ETH</span></div>{!quote.valid && <p role="alert" className="text-red-300">{quote.issues.join('; ') || 'Carrinho inválido.'}</p>}</section>}
-        <fieldset><legend className="mb-3 text-sm font-bold">Carteira e rede (simulação)</legend><div className="space-y-2">{providers.map(item => <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded border border-[#503328] p-3"><input type="radio" name="provider" className="accent-[#d38d50]" checked={provider === item.id} onChange={() => { setProvider(item.id); setReviewedSignature(null) }}/>{item.label}</label>)}</div></fieldset>
+      <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start" aria-label="Resumo do pagamento">
+        <section><h2 className="border-b border-[#503328] pb-3 text-base font-bold">Seus NFTs</h2>{loadingQuote ? <div role="status" className="nft-shimmer mt-4 h-44 rounded" aria-label="Carregando resumo"/> : quoteError ? <button type="button" onClick={() => void refetchQuote()} className="mt-4 text-red-300 underline">Falha ao buscar cotação. Tentar novamente</button> : !quote?.items.length ? <p className="mt-5 text-sm">Seu carrinho está vazio. <Link to="/" className="text-[#d38d50] underline">Explorar</Link></p> : <div className="mt-3 space-y-2"><div className="flex justify-between border-b border-[#503328] pb-2 text-xs"><span>NFTs</span><span>Subtotal</span></div>{quote.items.map(item => <div key={item.key} className="flex items-center gap-2 bg-[#251711] p-2"><img src={item.imageUrl} alt="" className="h-14 w-14 shrink-0 rounded object-cover"/><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold">{item.name}</p><p className="text-[11px] text-[#b99872]">{item.editionLabel} (x {item.quantity})</p></div><span className="shrink-0 text-xs font-bold text-[#d38d50]">{weiToEth(multiplyEth(item.unitPriceEth, item.quantity))} ETH</span></div>)}</div>}</section>
+        {quote && <section className="space-y-3 text-sm"><p className="text-center text-xs text-[#b99872]">Tem um código promocional? <Link to="/cart" className="text-[#f4ede5] underline">Aplique aqui</Link></p><div className="flex justify-between gap-2"><span>Subtotal</span><span>{quote.subtotalEth} ETH</span></div><div className="flex justify-between gap-2"><span>Desconto</span><span>− {quote.discountEth} ETH</span></div><div className="flex justify-between gap-2"><span>Taxa da rede</span><span>{quote.networkFeeEth} ETH</span></div><div className="flex justify-between gap-2 border-t border-[#503328] pt-4 text-lg font-bold"><span>Total</span><span className="text-[#d38d50]">{quote.totalEth} ETH</span></div>{!quote.valid && <p role="alert" className="text-red-300">{quote.issues.join('; ') || 'Carrinho inválido.'}</p>}</section>}
+        <fieldset><legend className="mb-3 text-center text-sm font-bold">Carteira e rede</legend><div className="space-y-2">{providers.map(item => <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded border border-[#503328] p-3"><input type="radio" name="provider" className="accent-[#d38d50]" checked={provider === item.id} onChange={() => { setProvider(item.id); setReviewedSignature(null) }}/>{item.label}</label>)}</div></fieldset>
         {message && <p role="alert" className="text-sm text-red-300">{message}</p>}
         {quote && quoteChanged && <p role="status" className="text-sm text-[#d38d50]">Antes de comprar, confirme a cotação mais recente da API.</p>}
         <button type="button" onClick={() => void reviewQuote()} disabled={!quote?.valid || busy} className="w-full rounded border border-[#d38d50] px-5 py-3 text-sm font-bold text-[#d38d50] disabled:opacity-50">{quoteChanged ? 'Revisar valores atualizados' : 'Revalidar cotação'}</button>
-        <button type="submit" disabled={!ready || busy} className="w-full rounded-lg bg-[#d38d50] px-5 py-4 font-bold text-[#160e0b] disabled:opacity-40">{busy ? 'Processando...' : 'Confirmar compra'}</button>
+        <button type="submit" disabled={!ready || busy} className="w-full rounded-sm bg-[#d38d50] px-5 py-3 font-bold text-[#160e0b] disabled:opacity-40">{busy ? 'Processando...' : 'Confirmar compra'}</button>
         <p className="text-center text-xs text-[#b99872]">Operação simulada. Nenhuma transação blockchain real será enviada.</p>
       </aside>
     </form>
