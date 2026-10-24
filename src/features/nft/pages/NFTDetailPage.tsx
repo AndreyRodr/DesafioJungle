@@ -103,7 +103,7 @@ function DetailContent({ nft }: { nft: NFTDetail }) {
         <div className="mt-8 rounded-3xl bg-[#281913] px-4 py-5 lg:hidden">
           <div className="flex items-center justify-between gap-2"><span className="text-sm text-[#b99872]">Qtd.</span>{quantityControl}<strong className="text-lg text-[#d38d50]">{edition?.priceEth ?? nft.priceEth} ETH</strong></div>
           <div className="mt-5 flex gap-3">
-            <button type="button" disabled={max===0||add.isPending} onClick={() => void handleAdd(true)} className="min-h-13 flex-1 rounded-full bg-[#d38d50] px-4 py-3 text-sm font-bold text-[#160e0b] disabled:opacity-50">Comprar NFT</button>
+            <button type="button" disabled={max===0||add.isPending} onClick={() => void handleAdd(true)} aria-label="Comprar agora" className="min-h-13 flex-1 rounded-full bg-[#d38d50] px-4 py-3 text-sm font-bold text-[#160e0b] disabled:opacity-50">Comprar NFT</button>
             <button type="button" disabled={max===0||add.isPending} onClick={() => void handleAdd(false)} aria-label="Adicionar ao carrinho" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#503328] text-[#b99872] disabled:opacity-50"><ShoppingCart size={23}/></button>
           </div>
         </div>
