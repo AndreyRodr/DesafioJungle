@@ -7,7 +7,7 @@ import { ArrowLeft, MoreVertical, WalletCards } from 'lucide-react'
 import { multiplyEth, weiToEth } from '@/features/cart/lib/money'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { listWallets } from '@/features/auth/api/auth'
-import type { Wallet } from '@/features/auth/types/auth'
+import type { Wallet, WalletNetwork } from '@/features/auth/types/auth'
 import { useCartQuote } from '@/features/cart/hooks/useCart'
 import { quoteFingerprint, type CheckoutBuyer, type OrderSnapshot } from '../types/orders'
 import { revalidateQuote } from '../api/checkout'
@@ -33,6 +33,27 @@ export function CheckoutPage() {
   const wallets = walletsQuery.data ?? []
   const [slot, setSlot] = useState<'primary' | 'secondary'>('primary')
   const selectedWallet = wallets.find((wallet) => wallet.slot === slot) ?? wallets[0]
+  const [networkChoice, setNetworkChoice] = useState<WalletNetwork | ''>('')
+  const effectiveNetwork = networkChoice || selectedWallet?.network || ''
+  const networkMatchesWallet = Boolean(selectedWallet && effectiveNetwork === selectedWallet.network)
+  function chooseNetwork(value: WalletNetwork | '') {
+    setNetworkChoice(value)
+    const matchingWallet = wallets.find(wallet => wallet.network === value)
+    if (matchingWallet) setSlot(matchingWallet.slot)
+    setReviewedSignature(null)
+  }
+  function chooseWallet(wallet: Wallet) {
+    setSlot(wallet.slot)
+    setNetworkChoice(wallet.network)
+    setReviewedSignature(null)
+  }
+  const [ensPrefix, setEnsPrefix] = useState('')
+  const [ensSuffix, setEnsSuffix] = useState('.eth')
+  function updateEns(prefix: string, suffix: string) {
+    setEnsPrefix(prefix)
+    setEnsSuffix(suffix)
+    updateBuyer('ensName', prefix.trim() ? `${prefix.trim()}${suffix}` : '')
+  }
   const [provider, setProvider] = useState<OrderSnapshot['walletProvider']>('coinbase')
   const [buyer, setBuyer] = useState<CheckoutBuyer>({ displayName: '', email: '', username: '', profileName: '', walletType: 'software', referralCode: '', ensName: '', secondaryWallet: '' })
   const [reviewedSignature, setReviewedSignature] = useState<string | null>(null)
@@ -40,7 +61,7 @@ export function CheckoutPage() {
   const [busy, setBusy] = useState(false)
   const currentSignature = useMemo(() => quote ? quoteFingerprint(quote) : '', [quote])
   const quoteChanged = reviewedSignature !== currentSignature
-  const ready = Boolean(quote?.valid && selectedWallet && reviewedSignature && !quoteChanged)
+  const ready = Boolean(quote?.valid && selectedWallet && networkMatchesWallet && reviewedSignature && !quoteChanged)
 
   async function reviewQuote() {
     setMessage('')
@@ -54,7 +75,7 @@ export function CheckoutPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!selectedWallet || !quote || !ready || busy) return
+    if (!selectedWallet || !networkMatchesWallet || !quote || !ready || busy) return
     setBusy(true); setMessage('')
     const fingerprint = quoteFingerprint(quote)
     try {
@@ -100,23 +121,23 @@ export function CheckoutPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">Nome de exibição <span className="text-[#d38d50]">*</span><input required minLength={2} maxLength={80} className={field} value={buyer.displayName} onChange={e => updateBuyer('displayName', e.target.value)} autoComplete="name" /></label>
           <label className="text-sm">Nome de usuário <span className="text-[#d38d50]">*</span><input required maxLength={40} className={field} value={buyer.username || user?.name || ''} onChange={e => updateBuyer('username', e.target.value)} /></label>
-          <label className="text-sm">Rede <span className="text-[#d38d50]">*</span><select required className={field} value={selectedWallet?.network ?? ''} disabled><option value="">Selecione uma rede</option><option value="ethereum">Ethereum</option><option value="polygon">Polygon</option><option value="base">Base</option></select></label>
+          <div className="text-sm"><label htmlFor="checkout-network">Rede <span className="text-[#d38d50]">*</span></label><select id="checkout-network" required className={field} value={effectiveNetwork} onChange={event => chooseNetwork(event.target.value as WalletNetwork | '')}><option value="">Selecione uma rede</option><option value="ethereum">Ethereum</option><option value="polygon">Polygon</option><option value="base">Base</option></select>{effectiveNetwork && !networkMatchesWallet && <p role="status" className="mt-2 text-xs leading-5 text-[#d38d50]">Você não possui carteira cadastrada para essa rede. <Link to="/wallets" className="underline">Cadastrar carteira</Link> ou selecione outra rede.</p>}</div>
           <label className="text-sm">Nome do perfil <span className="text-[#d38d50]">*</span><input required className={field} value={buyer.profileName || buyer.displayName} onChange={e => updateBuyer('profileName', e.target.value)} /></label>
           <label className="text-sm">Endereço da carteira <span className="text-[#d38d50]">*</span><input required readOnly className={field} value={selectedWallet?.address ?? ''} placeholder="Cadastre uma carteira" /></label>
           <label className="text-sm">ENS ou carteira secundária (opcional)<input className={field} maxLength={100} placeholder="nome.eth ou 0x..." value={buyer.secondaryWallet ?? ''} onChange={e => updateBuyer('secondaryWallet', e.target.value)} /></label>
           <label className="text-sm">Tipo de carteira <span className="text-[#d38d50]">*</span><select required className={field} value={buyer.walletType ?? 'software'} onChange={e => updateBuyer('walletType', e.target.value as 'software' | 'hardware')}><option value="software">Software</option><option value="hardware">Hardware</option></select></label>
           <label className="text-sm">Código de indicação (opcional)<input className={field} maxLength={32} value={buyer.referralCode ?? ''} onChange={e => updateBuyer('referralCode', e.target.value)} /></label>
           <label className="text-sm">E-mail <span className="text-[#d38d50]">*</span><input required type="email" className={field} value={buyer.email} onChange={e => updateBuyer('email', e.target.value)} autoComplete="email" /></label>
-          <label className="text-sm">Nome ENS (opcional)<input className={field} placeholder="nome.eth" maxLength={100} value={buyer.ensName ?? ''} onChange={e => updateBuyer('ensName', e.target.value)} /></label>
+          <div className="text-sm"><label htmlFor="checkout-ens-prefix">Nome ENS (opcional)</label><div className="mt-2 flex min-w-0 overflow-hidden rounded-sm border border-[#503328] focus-within:outline-2 focus-within:outline-[#d38d50]"><input id="checkout-ens-prefix" maxLength={90} placeholder="nome" value={ensPrefix} onChange={event => updateEns(event.target.value.replaceAll('.', ''), ensSuffix)} className="min-w-0 w-full flex-1 bg-transparent px-3 py-3 text-sm text-[#f4ede5] outline-none" /><label htmlFor="checkout-ens-suffix" className="sr-only">Extensão ENS ou domínio</label><select id="checkout-ens-suffix" value={ensSuffix} onChange={event => updateEns(ensPrefix, event.target.value)} className="w-24 shrink-0 border-l border-[#503328] bg-[#251711] px-2 py-3 text-sm text-[#f4ede5] focus-visible:outline-2 focus-visible:outline-[#d38d50]"><option value=".eth">.eth</option><option value=".xyz">.xyz</option><option value=".com">.com</option></select></div><p className="mt-1 text-[11px] text-[#b99872]">Sufixos ilustrativos; o nome não é verificado na rede.</p></div>
         </div>
         <h2 className="hidden pt-2 text-base font-bold lg:block">Carteira conectada</h2>
-        {walletsQuery.isPending ? <div className="nft-shimmer h-28 rounded" role="status" aria-label="Carregando carteiras"/> : walletsQuery.isError ? <p role="alert">Falha ao carregar carteiras. <button type="button" onClick={() => void walletsQuery.refetch()} className="underline">Tentar novamente</button></p> : wallets.length === 0 ? <p className="hidden rounded-lg border border-[#503328] bg-[#251711] p-5 text-sm lg:block">Nenhuma carteira cadastrada. <Link to="/wallets" className="text-[#d38d50] underline">Cadastrar carteira</Link></p> : <fieldset className="hidden space-y-3 lg:block"><legend className="sr-only">Selecionar carteira</legend>{wallets.map((w: Wallet) => <label key={w.slot} className={`flex cursor-pointer items-center gap-4 rounded-xl border p-4 ${selectedWallet?.slot === w.slot ? 'border-[#d38d50]' : 'border-[#503328]'} bg-[#251711]`}><input type="radio" name="wallet" checked={selectedWallet?.slot === w.slot} onChange={() => { setSlot(w.slot); setReviewedSignature(null) }} className="accent-[#d38d50]"/><WalletCards size={24} className="text-[#d38d50]"/><span className="min-w-0"><strong className="block">{w.label}</strong><span className="block truncate text-xs text-[#b99872]">{w.address} · {w.network}</span></span></label>)}</fieldset>}
+        {walletsQuery.isPending ? <div className="nft-shimmer h-28 rounded" role="status" aria-label="Carregando carteiras"/> : walletsQuery.isError ? <p role="alert">Falha ao carregar carteiras. <button type="button" onClick={() => void walletsQuery.refetch()} className="underline">Tentar novamente</button></p> : wallets.length === 0 ? <p className="hidden rounded-lg border border-[#503328] bg-[#251711] p-5 text-sm lg:block">Nenhuma carteira cadastrada. <Link to="/wallets" className="text-[#d38d50] underline">Cadastrar carteira</Link></p> : <fieldset className="hidden space-y-3 lg:block"><legend className="sr-only">Selecionar carteira</legend>{wallets.map((w: Wallet) => <label key={w.slot} className={`flex cursor-pointer items-center gap-4 rounded-xl border p-4 ${selectedWallet?.slot === w.slot ? 'border-[#d38d50]' : 'border-[#503328]'} bg-[#251711]`}><input type="radio" name="wallet" checked={selectedWallet?.slot === w.slot} onChange={() => chooseWallet(w)} className="accent-[#d38d50]"/><WalletCards size={24} className="text-[#d38d50]"/><span className="min-w-0"><strong className="block">{w.label}</strong><span className="block truncate text-xs text-[#b99872]">{w.address} · {w.network}</span></span></label>)}</fieldset>}
         <div className="hidden lg:block"><Link to="/wallets" className="text-sm text-[#d38d50] underline">Trocar ou cadastrar carteira</Link></div>
         <label className="block text-sm">Observações do colecionador (opcional)<textarea className={`${field} min-h-24 resize-y`} maxLength={500} value={buyer.notes ?? ''} onChange={e => updateBuyer('notes', e.target.value)}/></label>
       </section>
       <section aria-label="Seleção de carteira no celular" className="order-1 space-y-7 lg:hidden">
         <div className="flex items-center justify-between gap-3"><h2 className="text-lg font-bold">Carteira conectada</h2><Link to="/wallets" className="text-sm font-bold text-[#d38d50]">Trocar carteira</Link></div>
-        {walletsQuery.isPending ? <p role="status">Carregando carteiras...</p> : walletsQuery.isError ? <p role="alert">Não foi possível carregar as carteiras.</p> : wallets.length === 0 ? <p className="text-sm text-[#b99872]">Nenhuma carteira cadastrada. <Link to="/wallets" className="underline text-[#d38d50]">Cadastrar carteira</Link></p> : <fieldset className="space-y-4"><legend className="sr-only">Carteira conectada no celular</legend>{wallets.map(w => <label key={w.slot} className="flex cursor-pointer items-center gap-4 rounded-2xl bg-[#251711] p-5"><input type="radio" name="mobile-wallet" className="accent-[#d38d50]" checked={selectedWallet?.slot === w.slot} onChange={() => {setSlot(w.slot); setReviewedSignature(null)}} /><span className="min-w-0 flex-1"><strong className="block text-base">{w.label}</strong><span className="block truncate text-sm text-[#b99872]">{w.address.length > 24 ? `${w.address.slice(0,8)}…${w.address.slice(-5)}` : w.address}</span><span className="block text-sm text-[#b99872]">Rede {w.network}</span></span><MoreVertical size={18} className="text-[#b99872]" aria-hidden="true" /></label>)}</fieldset>}
+        {walletsQuery.isPending ? <p role="status">Carregando carteiras...</p> : walletsQuery.isError ? <p role="alert">Não foi possível carregar as carteiras.</p> : wallets.length === 0 ? <p className="text-sm text-[#b99872]">Nenhuma carteira cadastrada. <Link to="/wallets" className="underline text-[#d38d50]">Cadastrar carteira</Link></p> : <fieldset className="space-y-4"><legend className="sr-only">Carteira conectada no celular</legend>{wallets.map(w => <label key={w.slot} className="flex cursor-pointer items-center gap-4 rounded-2xl bg-[#251711] p-5"><input type="radio" name="mobile-wallet" className="accent-[#d38d50]" checked={selectedWallet?.slot === w.slot} onChange={() => chooseWallet(w)} /><span className="min-w-0 flex-1"><strong className="block text-base">{w.label}</strong><span className="block truncate text-sm text-[#b99872]">{w.address.length > 24 ? `${w.address.slice(0,8)}…${w.address.slice(-5)}` : w.address}</span><span className="block text-sm text-[#b99872]">Rede {w.network}</span></span><MoreVertical size={18} className="text-[#b99872]" aria-hidden="true" /></label>)}</fieldset>}
         <h2 className="text-lg font-bold">Carteira e rede</h2>
         <fieldset className="space-y-3"><legend className="sr-only">Provedor de carteira no celular</legend>{providers.map((item) => <label key={item.id} className="flex cursor-pointer items-center gap-4 rounded-2xl bg-[#251711] p-4"><span aria-hidden="true" className="flex h-11 w-11 items-center justify-center rounded-full border border-[#503328] text-[#d38d50]">{item.label[0]}</span><span className="flex-1 text-base">{item.label}</span><input type="radio" name="mobile-provider" className="accent-[#d38d50]" checked={provider === item.id} onChange={() => {setProvider(item.id);setReviewedSignature(null)}} /></label>)}</fieldset>
         <div className="flex items-center justify-end gap-4 text-lg font-bold"><span>Total:</span><span className="text-[#d38d50]">{quote?.totalEth ?? '—'} ETH</span></div>
